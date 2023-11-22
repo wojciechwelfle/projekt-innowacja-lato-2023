@@ -5,8 +5,8 @@
       "default": true
     }
   ],
-  "name": "projekt-innowacja",
+  "name": "sandbox",
   "namespace": "",
-  "sfdcLoginUrl": "https://test.salesforce.com",
-  "sourceApiVersion": "56.0"
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "58.0"
 }
