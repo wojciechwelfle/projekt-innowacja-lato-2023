@@ -27,6 +27,15 @@ public without sharing class RESTMedicalFacilitiesTests {
 
     @IsTest
     private static void testGetMethod() {
+        Medical_Facility__c facility = new Medical_Facility__c(
+            Name = 'Szpital dzieciecy', Phone_Number__c = '',
+            Monday__c = '09:00-17:00', Tuesday__c = '09:30-18:00', Wednesday__c = '10:00-19:00', 
+            Thursday__c = '08:00-16:30', Friday__c = '11:00-20:00', Saturday__c = '12:00-21:00', Sunday__c = '10:30-18:30',
+            City__c = 'ExampleCity', Street__c = 'Main Street', Building_number__c = '123', zip_code__c = '12-345'
+        );
+
+        insert facility;
+
         RestRequest request = new RestRequest();
         request.requestURI = 'services/apexrest/Medical_Facility__c';
         RestResponse response = new RestResponse();
@@ -34,33 +43,108 @@ public without sharing class RESTMedicalFacilitiesTests {
         RestContext.request = request;
         RestContext.response = response;
 
-        List<Medical_Facility__c> facilities = [SELECT Id, Name, Opening_Hours__c, Adress__c, Phone_Number__c FROM Medical_Facility__c];
 
         test.startTest();
-        List<Medical_Facility__c> facilitiesToCheck = RESTMedicalFacilities.getMedicalFacilities();
+        RESTMedicalFacilities.getMedicalFacilities();
         test.stopTest();
 
-        Assert.areEqual(200,response.statusCode );
-        // Assert.areEqual('{"phoneNumber":null,"openingHours":"Mon 2:42-12:37\nTue 6:17-14:59\nWed 16:58-1:53\nThu 16:10-24:36\nFri 11:00-19:57\nSat 9:23-20:24\nSun 2:50-11:16","name":"Warszawa","id":"a013N000005hnfhQAA","address":"Warszawa"},{"phoneNumber":null,"openingHours":"Mon 14:31-22:30\nTue 5:10-14:02\nWed 5:10-13:44\nThu 1:16-13:27\nFri 3:52-11:22\nSat 3:27-13:58\nSun 15:40-2:40","name":"Szpital","id":"a013N000005hnhJQAQ","address":null},{"phoneNumber":null,"openingHours":"Mon 23:15-11:42\nTue 21:53-5:03\nWed 1:42-11:05\nThu 23:13-11:21\nFri 5:20-14:26\nSat 18:58-5:25\nSun 17:53-4:42","name":"Lodz","id":"a013N000005hnfcQAA","address":null}' ,
-        // response.responseBody.toString());
-        Assert.areEqual(facilities, facilitiesToCheck);
+        String responseBody = '[{"phoneNumber":null,"openingHours":{"Monday":"09:00-17:00","Tuesday":"09:30-18:00","Wednesday":"10:00-19:00","Thursday":"08:00-16:30","Friday":"11:00-20:00","Saturday":"12:00-21:00","Sunday":"10:30-18:30"},"name":"Szpital dzieciecy","id":"' + facility.id + '","address":["ExampleCity","Main Street","123","12-345"]}]';
+
+        Assert.areEqual(200,response.statusCode);
+        Assert.areEqual(responseBody, response.responseBody.toString());
     }
 
     @isTest
     private static void testPutMethod() {
+        Medical_Facility__c facility = new Medical_Facility__c(
+            Name = 'Izba pomocy', Phone_Number__c = '',
+            Monday__c = '09:32-13:30', Tuesday__c = '06:30-18:00', Wednesday__c = '16:00-19:00', 
+            Thursday__c = '06:00-16:30', Friday__c = '15:00-20:00', Saturday__c = '12:00-21:00', Sunday__c = '10:30-18:30',
+            City__c = 'asdf', Street__c = 'erqw Street', Building_number__c = '321', zip_code__c = '23-385'
+        );
+
+        insert facility;
+
         RestRequest request = new RestRequest();
         request.requestURI = 'services/apexrest/Medical_Facility__c';
         RestResponse response = new RestResponse();
-        request.requestBody = Blob.valueOf('{"id":"a013N000005hnfhQAA","openingHours":"Mon 10:13-22:11\nTue 10:13-14:57\nWed 10:38-18:54\nThu 7:45-19:49\nFri 16:11-4:57\nSat18:34-5:37\nSun 23:27-10:21","name":"Bytom"}');
+
+        request.requestBody = Blob.valueOf('[{"id":"' + facility.id + '","openingHours":{"Monday":"09:00-17:00","Tuesday":"09:30-18:00","Wednesday":"10:00-19:00","Thursday":"08:00-16:30","Friday":"11:00-20:00","Saturday":"12:00-21:00","Sunday":"10:30-18:30"},"name":"Bytom"}]');
 
         RestContext.request = request;
         RestContext.response = response;
 
         test.startTest();
-        String output = RESTMedicalFacilities.putMedicalFacilities();
+        List<Id> output = RESTMedicalFacilities.putMedicalFacilities();
         test.stopTest();
 
-        Assert.areEqual(output, 'Object a013N000005hnfhQAA has been updated!');
+        Assert.areEqual(output[0],facility.id);
+    }
+
+    @isTest
+    private static void emptyBodyPutMethod() {
+
+        RestRequest request = new RestRequest();
+        request.requestURI = 'services/apexrest/Medical_Facility__c';
+        RestResponse response = new RestResponse();
+
+        request.requestBody = Blob.valueOf('');
+
+        RestContext.request = request;
+        RestContext.response = response;
+
+        test.startTest();
+        List<Id> output = RESTMedicalFacilities.putMedicalFacilities();
+        test.stopTest();
+
+        System.assertEquals('{"error": "No content to map to Object due to end of input"}', response.responseBody.toString());
+        System.assertEquals(400, response.statusCode);
+    }
+
+    @isTest
+    private static void listPutMethod() {
+        List<Medical_Facility__c> facilities = new List<Medical_Facility__c>();
+        
+        facilities.add(
+            new Medical_Facility__c(
+                Name = 'Szpital wojewodzki', Phone_Number__c = '789456123',
+                Monday__c = '09:32-13:30', Tuesday__c = '06:30-18:00', Wednesday__c = '16:00-19:00', 
+                Thursday__c = '06:00-15:30', Friday__c = '15:00-20:00', Saturday__c = '12:00-21:00', Sunday__c = '10:30-18:30',
+                City__c = 'ABC', Street__c = 'abc', Building_number__c = '1', zip_code__c = '11-111'
+            )
+        );
+
+        facilities.add(
+            new Medical_Facility__c(
+                Name = 'Izba pomocy', Phone_Number__c = '',
+                Monday__c = '09:32-13:30', Tuesday__c = '06:30-18:00', Wednesday__c = '16:00-19:00', 
+                Thursday__c = '06:00-16:30', Friday__c = '15:00-20:00', Saturday__c = '12:00-21:00', Sunday__c = '10:30-18:30',
+                City__c = 'asdf', Street__c = 'erqw Street', Building_number__c = '321', zip_code__c = '23-385'
+            )
+        );
+
+        insert facilities;
+
+        List<Id> ids = new List<Id>();
+
+        ids.add(facilities[0].id);
+        ids.add(facilities[1].id);
+
+        RestRequest request = new RestRequest();
+        request.requestURI = 'services/apexrest/Medical_Facility__c';
+        RestResponse response = new RestResponse();
+
+        request.requestBody = Blob.valueOf('[{"openingHours":{"Monday":"00:00-17:00","Tuesday":"00:30-18:00","Wednesday":"10:00-19:00","Thursday":"00:00-16:30","Friday":"00:00-20:00","Saturday":"00:00-21:00","Sunday":"00:30-18:30"},"name":"Szpital dzieciecy","id":"' + ids[0] + '"},{"openingHours":{"Monday":"00:30-16:30","Tuesday":"00:30-16:30","Wednesday":"00:30-16:30","Thursday":"00:30-16:30","Friday":"00:30-16:30","Saturday":"00:30-16:30","Sunday":"00:30-16:30"},"name":"Szpital Lodz","id":"' + ids[1] + '"}]');
+
+
+        RestContext.request = request;
+        RestContext.response = response;
+
+        test.startTest();
+        List<Id> output = RESTMedicalFacilities.putMedicalFacilities();
+        test.stopTest();
+
+        Assert.areEqual(output, ids);
     }
 
 }
