@@ -2,27 +2,30 @@
 global with sharing class RESTMedicalFacilities {
     
     @HttpGet
-    global static void getMedicalFacilities() {
-       RestRequest request = RestContext.request;
-       System.debug(request);
-        
+    global static List<Medical_Facility__c> getMedicalFacilities() {
+        RestRequest request = RestContext.request;
         Map<String, String> params = request.params;
-        System.debug(params);
 
-        List<Medical_Facility__c> facility = [SELECT Id, Name, Opening_Hours__c, Adress__c, Phone_Number__c	
+        List<Medical_Facility__c> facilities = [SELECT Id, Name, Opening_Hours__c, Adress__c, Phone_Number__c	
                                               FROM Medical_Facility__c];
 
         List<MedicalFacilityWrapper> wrapper = new List<MedicalFacilityWrapper>();
         
-        for (Medical_Facility__c fac : facility) {
+        for (Medical_Facility__c fac : facilities) {
             wrapper.add(
                 new MedicalFacilityWrapper(fac.Name, fac.Opening_Hours__c, fac.Phone_Number__c, fac.Adress__c, fac.Id)
-            );        
+            );     
         }
 
+        String responseBody = JSON.serialize(wrapper);
 
+        // String 
+        
         RestContext.response.statusCode = 200;
-        RestContext.response.responseBody = Blob.valueOf(JSON.serialize(wrapper));
+        // RestContext.response.responseBody = Blob.valueOf(responseBody);
+        RestContext.response.responseBody = Blob.valueOf(responseBody);
+
+        return facilities;
     }
     
     @HttpPut
@@ -45,8 +48,6 @@ global with sharing class RESTMedicalFacilities {
     global static void postMedicalFacilities() {
         String jsonBody = RestContext.request.requestBody.toString();
         OpeningHours wrapper = (OpeningHours) JSON.deserialize(jsonBody, OpeningHours.class);
-
-        //System.debug(wrapper);
 
         Map<Id, String> openFacilities = new Map<Id, String>();
 
