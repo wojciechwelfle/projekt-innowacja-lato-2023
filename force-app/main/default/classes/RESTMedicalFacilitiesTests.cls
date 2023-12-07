@@ -178,6 +178,10 @@ public without sharing class RESTMedicalFacilitiesTests {
         Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c FROM Medical_Facility__c];
 
         Test.startTest();
+        // String jobId = System.schedule('MedicalFacilityOpenHoursUpdate',
+        // null, new MedicalFacilityOpenHoursUpdate());
+
+        
 
         MedicalFacilityOpenHoursUpdate schedulableInstance = new MedicalFacilityOpenHoursUpdate();
 
