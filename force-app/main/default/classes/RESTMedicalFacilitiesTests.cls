@@ -172,4 +172,35 @@ public without sharing class RESTMedicalFacilitiesTests {
         Assert.areEqual(response.responseBody.toString(), '["Szpital dzieciecy"]');
     }
 
+    @isTest
+    private static void testSchedulableOpenHoursUpdate() {
+        List<Medical_Facility__c> facilities = [select Id, Name, Phone_Number__c,
+        Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c FROM Medical_Facility__c];
+
+        Test.startTest();
+        // String jobId = System.schedule('MedicalFacilityOpenHoursUpdate',
+        // null, new MedicalFacilityOpenHoursUpdate());
+
+        
+
+        MedicalFacilityOpenHoursUpdate schedulableInstance = new MedicalFacilityOpenHoursUpdate();
+
+        schedulableInstance.execute(null);
+
+        Test.stopTest();
+        
+        List<Medical_Facility__c> updatedFacilities = [select Id, Name, Phone_Number__c,
+        Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c FROM Medical_Facility__c];
+
+        for (Integer i = 0; i<facilities.size();++i) {
+             Assert.arenotEqual(facilities[i].Monday__c, updatedFacilities[i].Monday__c);
+             Assert.arenotEqual(facilities[i].Tuesday__c, updatedFacilities[i].Tuesday__c);
+             Assert.arenotEqual(facilities[i].Wednesday__c, updatedFacilities[i].Wednesday__c);
+             Assert.arenotEqual(facilities[i].Thursday__c, updatedFacilities[i].Thursday__c);
+             Assert.arenotEqual(facilities[i].Friday__c, updatedFacilities[i].Friday__c);
+             Assert.arenotEqual(facilities[i].Saturday__c, updatedFacilities[i].Saturday__c);
+             Assert.arenotEqual(facilities[i].Sunday__c, updatedFacilities[i].Sunday__c);
+        }
+    }
+
 }

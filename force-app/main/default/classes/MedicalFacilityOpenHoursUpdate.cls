@@ -4,17 +4,26 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable 
     }
 
     public static void updateOpenHours() {
-        List<Medical_Facility__c> facilities = [SELECT Id, Opening_Hours__c FROM Medical_Facility__c];
+        List<Medical_Facility__c> facilities = [SELECT Id, 
+        Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c FROM Medical_Facility__c];
 
         for (Medical_Facility__c facility : facilities) {
-            String newOpenHours = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-            facility.Opening_Hours__c = newOpenHours;
+            List<String> newOpenHours = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+            facility.Monday__c = newOpenHours[0];
+            facility.Tuesday__c = newOpenHours[1];
+            facility.Wednesday__c = newOpenHours[2];
+            facility.Thursday__c = newOpenHours[3];
+            facility.Friday__c = newOpenHours[4];
+            facility.Saturday__c = newOpenHours[5];
+            facility.Sunday__c = newOpenHours[6];
         }
 
-        update facilities;
+        if (!facilities.isEmpty()) {
+            update facilities;
+        }
     }
 
-    private static String generateOpenHours() {
+    private static List<String> generateOpenHours() {
         DateTime initialDayMonday = DateTime.newInstance(2023, 12, 4, 0, 0, 0);
         List<String> openHours = new List<String>();
         
@@ -27,17 +36,15 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable 
             Integer closeHour = (openHour + randomH > 24 ? openHour + randomH - 24 : openHour + randomH);
             Integer closeMinute = (Integer)Math.floor(Math.random() * 60);
 
-            String day = initialDayMonday.format('E');
-
             String openMinuteString = (openMinute < 10 ? '0' + String.valueOf(openMinute) : String.valueOf(openMinute));
             String closeMinuteString = (closeMinute < 10 ? '0' + String.valueOf(closeMinute) : String.valueOf(closeMinute));
 
-            String line = day + ' ' + String.valueOf(openHour) + ':' + openMinuteString + '-' + String.valueOf(closeHour) + ':' + closeMinuteString;
+            String line = String.valueOf(openHour) + ':' + openMinuteString + '-' + String.valueOf(closeHour) + ':' + closeMinuteString;
             
             openHours.add(line);
             initialDayMonday = initialDayMonday.addDays(1);
         }
 
-        return String.join(openHours, '\n');
+        return openHours;
     }
 }

@@ -119,66 +119,79 @@ global with sharing class RESTMedicalFacilities {
             RestContext.response.responseBody = Blob.valueOf('{"error": "' + e.getMessage() + '"}');
             RestContext.response.statusCode = 400;
             return null;
+        } catch (Exception e) {
+            RestContext.response.responseBody = Blob.valueOf('{"error": "' + e.getMessage() + '"}');
+            RestContext.response.statusCode = 403;
+            return null;
         }
        
     }
 
     @HttpPost
     global static void postMedicalFacilities() {
-        String jsonBody = RestContext.request.requestBody.toString();
-        OpeningHours wrapper = (OpeningHours) JSON.deserialize(jsonBody, OpeningHours.class);
+        try {
+            String jsonBody = RestContext.request.requestBody.toString();
+            OpeningHours wrapper = (OpeningHours) JSON.deserialize(jsonBody, OpeningHours.class);
 
-        DateTime fromDateTime = DateTime.valueOf(wrapper.fromDateTime);
-        DateTime toDateTime = DateTime.valueOf(wrapper.toDateTime);
+            DateTime fromDateTime = DateTime.valueOf(wrapper.fromDateTime);
+            DateTime toDateTime = DateTime.valueOf(wrapper.toDateTime);
 
-        Map<String, Integer> daysOfWeek = RESTMedicalFacilities.getDaysOfWeekBetweenDates(fromDateTime, toDateTime);
-        
-        List<Medical_Facility__c> facilities = [SELECT Id, Name, 
-        Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c
-        FROM Medical_Facility__c];
-
-        List<String> facilitiesNamesOpenedInCertainTime = new List<String>();
-
-        
-
-        for (Medical_Facility__c facility : facilities) {
+            Map<String, Integer> daysOfWeek = RESTMedicalFacilities.getDaysOfWeekBetweenDates(fromDateTime, toDateTime);
             
-            Map<String, String> facilityOpenHoursMap = RESTMedicalFacilities.createOpenHoursMap(
-                facility.Monday__c, facility.Tuesday__c, facility.Wednesday__c, facility.Thursday__c, 
-                facility.Friday__c, facility.Saturday__c, facility.Sunday__c
-            );
+            List<Medical_Facility__c> facilities = [SELECT Id, Name, 
+            Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c
+            FROM Medical_Facility__c];
 
-            Map<String, Integer> weekDaysAndNumber = RESTMedicalFacilities.getDaysOfWeekBetweenDates(fromDateTime, toDateTime);
-            Date dateForDateTime = Date.newInstance(fromDateTime.year(), fromDateTime.month(), fromDateTime.day());
+            List<String> facilitiesNamesOpenedInCertainTime = new List<String>();
 
-            for (String singleDay : weekDaysAndNumber.keySet()) {
+            
 
-                List<Integer> hoursForSingleDay = RESTMedicalFacilities.getOpenAndCloseHoursAndMinutes(
-                    facilityOpenHoursMap.get(singleDay)
+            for (Medical_Facility__c facility : facilities) {
+                
+                Map<String, String> facilityOpenHoursMap = RESTMedicalFacilities.createOpenHoursMap(
+                    facility.Monday__c, facility.Tuesday__c, facility.Wednesday__c, facility.Thursday__c, 
+                    facility.Friday__c, facility.Saturday__c, facility.Sunday__c
                 );
 
-                DateTime singleDayOpenHour = DateTime.newInstance(
-                    dateForDateTime.year(), dateForDateTime.month(), weekDaysAndNumber.get(singleDay), hoursForSingleDay[0], hoursForSingleDay[1], 0
-                );
+                Map<String, Integer> weekDaysAndNumber = RESTMedicalFacilities.getDaysOfWeekBetweenDates(fromDateTime, toDateTime);
+                Date dateForDateTime = Date.newInstance(fromDateTime.year(), fromDateTime.month(), fromDateTime.day());
 
-                DateTime singleDayClosingHour = DateTime.newInstance(
-                    dateForDateTime.year(), dateForDateTime.month(), weekDaysAndNumber.get(singleDay), hoursForSingleDay[2], hoursForSingleDay[3], 0
-                );
+                for (String singleDay : weekDaysAndNumber.keySet()) {
 
-                if (
-                    (toDateTime >= singleDayOpenHour && toDateTime <= singleDayClosingHour) ||
-                    (fromDateTime >= singleDayOpenHour && fromDateTime <= singleDayClosingHour)
-                    ) {
-                    facilitiesNamesOpenedInCertainTime.add(facility.Name);
+                    List<Integer> hoursForSingleDay = RESTMedicalFacilities.getOpenAndCloseHoursAndMinutes(
+                        facilityOpenHoursMap.get(singleDay)
+                    );
+
+                    DateTime singleDayOpenHour = DateTime.newInstance(
+                        dateForDateTime.year(), dateForDateTime.month(), weekDaysAndNumber.get(singleDay), hoursForSingleDay[0], hoursForSingleDay[1], 0
+                    );
+
+                    DateTime singleDayClosingHour = DateTime.newInstance(
+                        dateForDateTime.year(), dateForDateTime.month(), weekDaysAndNumber.get(singleDay), hoursForSingleDay[2], hoursForSingleDay[3], 0
+                    );
+
+                    if (
+                        (toDateTime >= singleDayOpenHour && toDateTime <= singleDayClosingHour) ||
+                        (fromDateTime >= singleDayOpenHour && fromDateTime <= singleDayClosingHour)
+                        ) {
+                        facilitiesNamesOpenedInCertainTime.add(facility.Name);
+                    }
+
+                    dateForDateTime.addDays(1);
                 }
-
-                dateForDateTime.addDays(1);
             }
-        }
 
-        RestResponse res = RestContext.response;
-        res.statusCode = 200;
-        res.responseBody = Blob.valueOf(JSON.serialize(facilitiesNamesOpenedInCertainTime));
+            RestResponse res = RestContext.response;
+            res.statusCode = 200;
+            res.responseBody = Blob.valueOf(JSON.serialize(facilitiesNamesOpenedInCertainTime));
+        } catch (JSONException e) {
+            RestContext.response.responseBody = Blob.valueOf('{"error": "' + e.getMessage() + '"}');
+            RestContext.response.statusCode = 400;
+        } catch (Exception e) {
+            RestContext.response.responseBody = Blob.valueOf('{"error": "' + e.getMessage() + '"}');
+            RestContext.response.statusCode = 403;
+        }
+        
     }
 
 
