@@ -123,103 +123,87 @@ global with sharing class RESTMedicalFacilities {
        
     }
 
-    // @HttpPost
-    // global static void postMedicalFacilities() {
-    //     String jsonBody = RestContext.request.requestBody.toString();
-    //     OpeningHours wrapper = (OpeningHours) JSON.deserialize(jsonBody, OpeningHours.class);
+    @HttpPost
+    global static void postMedicalFacilities() {
+        String jsonBody = RestContext.request.requestBody.toString();
+        OpeningHours wrapper = (OpeningHours) JSON.deserialize(jsonBody, OpeningHours.class);
 
-    //     Map<Id, String> openFacilities = new Map<Id, String>();
+        DateTime fromDateTime = DateTime.valueOf(wrapper.fromDateTime);
+        DateTime toDateTime = DateTime.valueOf(wrapper.toDateTime);
 
-    //     DateTime fromDateTime = DateTime.valueOf(wrapper.fromDateTime);
-    //     DateTime toDateTime = DateTime.valueOf(wrapper.toDateTime);
-
-    //     Map<Integer, Map<String, Integer>> daysOfWeek = RESTMedicalFacilities.getDaysOfWeekBetweenDates(fromDateTime, toDateTime);
+        Map<String, Integer> daysOfWeek = RESTMedicalFacilities.getDaysOfWeekBetweenDates(fromDateTime, toDateTime);
         
-    //     List<Medical_Facility__c> facilities = [SELECT Id, Name, Opening_Hours__c FROM Medical_Facility__c];
+        List<Medical_Facility__c> facilities = [SELECT Id, Name, 
+        Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c
+        FROM Medical_Facility__c];
 
-    //     Map<Id, String> facilitiesNamesOpenedInCertainTime = new Map<Id, String>();
+        List<String> facilitiesNamesOpenedInCertainTime = new List<String>();
 
-    //     for (Medical_Facility__c facility : facilities) {
+        
+
+        for (Medical_Facility__c facility : facilities) {
             
-    //         Map<String, String[]> hours = RESTMedicalFacilities.openHours(facility.Opening_Hours__c);
+            Map<String, String> facilityOpenHoursMap = RESTMedicalFacilities.createOpenHoursMap(
+                facility.Monday__c, facility.Tuesday__c, facility.Wednesday__c, facility.Thursday__c, 
+                facility.Friday__c, facility.Saturday__c, facility.Sunday__c
+            );
+
+            Map<String, Integer> weekDaysAndNumber = RESTMedicalFacilities.getDaysOfWeekBetweenDates(fromDateTime, toDateTime);
+            Date dateForDateTime = Date.newInstance(fromDateTime.year(), fromDateTime.month(), fromDateTime.day());
+
+            for (String singleDay : weekDaysAndNumber.keySet()) {
+
+                List<Integer> hoursForSingleDay = RESTMedicalFacilities.getOpenAndCloseHoursAndMinutes(
+                    facilityOpenHoursMap.get(singleDay)
+                );
+
+                DateTime singleDayOpenHour = DateTime.newInstance(
+                    dateForDateTime.year(), dateForDateTime.month(), weekDaysAndNumber.get(singleDay), hoursForSingleDay[0], hoursForSingleDay[1], 0
+                );
+
+                DateTime singleDayClosingHour = DateTime.newInstance(
+                    dateForDateTime.year(), dateForDateTime.month(), weekDaysAndNumber.get(singleDay), hoursForSingleDay[2], hoursForSingleDay[3], 0
+                );
+
+                if (
+                    (toDateTime >= singleDayOpenHour && toDateTime <= singleDayClosingHour) ||
+                    (fromDateTime >= singleDayOpenHour && fromDateTime <= singleDayClosingHour)
+                    ) {
+                    facilitiesNamesOpenedInCertainTime.add(facility.Name);
+                }
+
+                dateForDateTime.addDays(1);
+            }
+        }
+
+        RestResponse res = RestContext.response;
+        res.statusCode = 200;
+        res.responseBody = Blob.valueOf(JSON.serialize(facilitiesNamesOpenedInCertainTime));
+    }
 
 
-    //         for (Integer month : daysOfWeek.keySet()) {
-    //             Map<String, Integer> availableDays = daysOfWeek.get(month);
+    public static List<Integer> getOpenAndCloseHoursAndMinutes(String openHoursAndCloseHours) {
+        List<Integer> output = new List<Integer>();
 
-    //             for (String singleDay : availableDays.keySet()) {
+        for (String part : openHoursAndCloseHours.split(':|-')) {
+            output.add(Integer.valueOf(part));
+        }     
 
-    //                 String[] hoursForSingleDay = hours.get(singleDay);
+        return output;
+    }
 
-    //                 Integer openH = Integer.valueOf(hoursForSingleDay[0].split(':')[0]);
-    //                 Integer openM = Integer.valueOf(hoursForSingleDay[0].split(':')[1]);
-    //                 Integer closeH = Integer.valueOf(hoursForSingleDay[1].split(':')[0]);
-
-    //                 String closeMString = hoursForSingleDay[1].split(':')[1];
-    //                 Integer closeM = Integer.valueOf(closeMString.substring(0,2));
-                    
-    //                 DateTime singleDayOpenHour = DateTime.newInstance(fromDateTime.year(), fromDateTime.month(), availableDays.get(singleDay), openH, openM, 0);
-    //                 DateTime singleDayClosingHour = DateTime.newInstance(fromDateTime.year(), fromDateTime.month(), availableDays.get(singleDay), closeH, closeM, 0);
-
-
-    //                 System.debug('singleDayOpenHour: ' + singleDayOpenHour);
-    //                 System.debug('singleDayClosingHour' + singleDayClosingHour);
-
-    //                 System.debug('fromDateTime: ' + fromDateTime);
-    //                 System.debug('toDateTime' + toDateTime);
-                    
-    //                 if (
-    //                     (singleDayOpenHour <= fromDateTime && singleDayClosingHour >= toDateTime) ||
-    //                     (toDateTime >= singleDayOpenHour && toDateTime <= singleDayClosingHour) ||
-    //                     (fromDateTime >= singleDayOpenHour && fromDateTime <= singleDayClosingHour)
-    //                     ) {
-    //                     facilitiesNamesOpenedInCertainTime.put(facility.Id, facility.Name);
-    //                 }
-    //             }
-    //         }
-            
-    //     }
-
-    //     System.debug(facilitiesNamesOpenedInCertainTime);
-    //     RestResponse res = RestContext.response;
-    //     res.statusCode = 200;
-    //     res.responseBody = Blob.valueOf(JSON.serialize(facilitiesNamesOpenedInCertainTime));
-    // }
-
-    // private static Map<String, String[]> openHours(String hours) {
-    //     Map<String, String[]> openHoursMap = new Map<String, String[]>();
-    //     List<String> splittedDays = hours.split('\n');
-
-    //     for (String day : splittedDays) {
-    //         List<String> dayName = day.split(' ');
-    //         openHoursMap.put(dayName[0], dayName[1].split('-'));
-    //     }
-
-    //     return openHoursMap;
-    // }
-
-    // public static Map<Integer, Map<String, Integer>> getDaysOfWeekBetweenDates(DateTime fromDateTime, DateTime toDateTime) {
-    //     Map<Integer, Map<String, Integer>> monthDayMap = new Map<Integer, Map<String, Integer>>();
+    public static Map<String, Integer> getDaysOfWeekBetweenDates(DateTime fromDateTime, DateTime toDateTime) {
+        Map<String, Integer> dayMap = new Map<String, Integer>();
     
-    //     while (fromDateTime <= toDateTime) {
-    //         Integer month = fromDateTime.month();
-    //         String dayOfWeek = fromDateTime.format('E');
-    //         Integer dayOfMonth = fromDateTime.day();
+        while (fromDateTime <= toDateTime || dayMap.size() != 7) {
+            String dayOfWeek = fromDateTime.format('EEEE');
+            Integer dayOfMonth = fromDateTime.day();
     
-    //         if (!monthDayMap.containsKey(month)) {
-    //             monthDayMap.put(month, new Map<String, Integer>());
-    //         }
+            dayMap.put(dayOfWeek, dayOfMonth);
     
-    //         monthDayMap.get(month).put(dayOfWeek, dayOfMonth);
+            fromDateTime = fromDateTime.addDays(1);
+        }
     
-    //         fromDateTime = fromDateTime.addDays(1);
-    //     }
-    
-    //     return monthDayMap;
-    // }
-    
-   
-
-    
-    
+        return dayMap;
+    }    
 }
