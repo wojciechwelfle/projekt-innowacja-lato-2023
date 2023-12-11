@@ -1,50 +1,78 @@
-global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable {
+global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable, Database.Batchable<SObject>, Database.Stateful {
+    
+    public static final String JOB_NAME = 'Return Reminder Job';
+    
+    //Codziennie o 5 rano
+    public static final String CRON_TIME = '0 0 5 * * ?';
+    Exception[] errors = new Exception[0];
+
+
+    public static Id scheduleMe() {
+        MedicalFacilityOpenHoursUpdate schedule = new MedicalFacilityOpenHoursUpdate();
+        return System.schedule(
+          JOB_NAME,
+          CRON_TIME,
+          schedule
+        );
+      }
+    
     global void execute(SchedulableContext ctx) {
-        MedicalFacilityOpenHoursUpdate.updateOpenHours();
+        Database.executeBatch(new MedicalFacilityOpenHoursUpdate(), 100);
     }
 
-    public static void updateOpenHours() {
-        List<Medical_Facility__c> facilities = [SELECT Id, 
-        Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c FROM Medical_Facility__c];
+    public Database.QueryLocator start(Database.BatchableContext bc) {
+        return Database.getQueryLocator(
+          [
+            SELECT Id, 
+            Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c
+            FROM Medical_Facility__c
+          ]
+        );
+    }
 
+    public void execute(Database.BatchableContext bc, List<Medical_Facility__c> facilities) { 
+      try{       
         for (Medical_Facility__c facility : facilities) {
-            List<String> newOpenHours = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-            facility.Monday__c = newOpenHours[0];
-            facility.Tuesday__c = newOpenHours[1];
-            facility.Wednesday__c = newOpenHours[2];
-            facility.Thursday__c = newOpenHours[3];
-            facility.Friday__c = newOpenHours[4];
-            facility.Saturday__c = newOpenHours[5];
-            facility.Sunday__c = newOpenHours[6];
+            facility.Monday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+            facility.Tuesday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+            facility.Wednesday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+            facility.Thursday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+            facility.Friday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+            facility.Saturday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+            facility.Sunday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
         }
 
         if (!facilities.isEmpty()) {
             update facilities;
         }
+      } catch(Exception e) {
+            errors.add(e);
+      }
     }
 
-    private static List<String> generateOpenHours() {
-        DateTime initialDayMonday = DateTime.newInstance(2023, 12, 4, 0, 0, 0);
-        List<String> openHours = new List<String>();
-        
-
-        for (Integer i = 0; i < 7; ++i) {
-            Integer openHour = (Integer)Math.floor(Math.random() * 24);
-            Integer openMinute = (Integer)Math.floor(Math.random() * 60);
-
-            Integer randomH = 8 + (Integer)Math.floor(Math.random() * (13 - 8));
-            Integer closeHour = (openHour + randomH > 24 ? openHour + randomH - 24 : openHour + randomH);
-            Integer closeMinute = (Integer)Math.floor(Math.random() * 60);
-
-            String openMinuteString = (openMinute < 10 ? '0' + String.valueOf(openMinute) : String.valueOf(openMinute));
-            String closeMinuteString = (closeMinute < 10 ? '0' + String.valueOf(closeMinute) : String.valueOf(closeMinute));
-
-            String line = String.valueOf(openHour) + ':' + openMinuteString + '-' + String.valueOf(closeHour) + ':' + closeMinuteString;
-            
-            openHours.add(line);
-            initialDayMonday = initialDayMonday.addDays(1);
+    public void finish(Database.BatchableContext bc){
+      if(!errors.isEmpty()) {
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setSubject('Errors occurred during batch process.');
+        mail.setTargetObjectId(UserInfo.getUserId());
+        mail.setSaveAsActivity(false);
+        String body = String.valueOf(errors);
+        mail.setPlainTextBody(body);
+        Messaging.sendEmail(new Messaging.Email[] { mail });
         }
+    }
 
-        return openHours;
+    private static String generateOpenHours() {
+        Integer openHour = (Integer)Math.floor(Math.random() * 24);
+        Integer openMinute = (Integer)Math.floor(Math.random() * 60);
+
+        Integer randomH = 8 + (Integer)Math.floor(Math.random() * (13 - 8));
+        Integer closeHour = (openHour + randomH > 24 ? openHour + randomH - 24 : openHour + randomH);
+        Integer closeMinute = (Integer)Math.floor(Math.random() * 60);
+
+        String openMinuteString = (openMinute < 10 ? '0' + String.valueOf(openMinute) : String.valueOf(openMinute));
+        String closeMinuteString = (closeMinute < 10 ? '0' + String.valueOf(closeMinute) : String.valueOf(closeMinute));
+
+        return String.valueOf(openHour) + ':' + openMinuteString + '-' + String.valueOf(closeHour) + ':' + closeMinuteString;
     }
 }
