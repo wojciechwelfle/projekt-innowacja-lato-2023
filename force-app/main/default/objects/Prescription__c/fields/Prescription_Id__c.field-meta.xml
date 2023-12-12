@@ -3,7 +3,9 @@
     <fullName>Prescription_Id__c</fullName>
     <externalId>false</externalId>
     <label>Prescription Id</label>
+    <length>30</length>
     <required>true</required>
     <trackTrending>false</trackTrending>
-    <type>TextArea</type>
+    <type>Text</type>
+    <unique>false</unique>
 </CustomField>
