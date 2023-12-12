@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Patient__c</fullName>
-    <deleteConstraint>Restrict</deleteConstraint>
     <externalId>false</externalId>
     <label>Patient</label>
     <lookupFilter>
@@ -15,8 +14,10 @@
     </lookupFilter>
     <referenceTo>Person__c</referenceTo>
     <relationshipLabel>Medical Appointments (Patient)</relationshipLabel>
-    <relationshipName>Medical_Appointments1</relationshipName>
-    <required>true</required>
+    <relationshipName>Medical_Appointment</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
     <trackTrending>false</trackTrending>
-    <type>Lookup</type>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
 </CustomField>
