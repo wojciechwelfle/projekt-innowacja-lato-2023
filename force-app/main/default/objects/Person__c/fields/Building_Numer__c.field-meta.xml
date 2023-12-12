@@ -3,10 +3,9 @@
     <fullName>Building_Numer__c</fullName>
     <externalId>false</externalId>
     <label>Building Numer</label>
-    <precision>5</precision>
+    <length>13</length>
     <required>true</required>
-    <scale>0</scale>
     <trackTrending>false</trackTrending>
-    <type>Number</type>
+    <type>Text</type>
     <unique>false</unique>
 </CustomField>
