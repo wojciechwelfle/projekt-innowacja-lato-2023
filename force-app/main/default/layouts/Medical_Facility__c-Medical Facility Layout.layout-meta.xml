@@ -54,7 +54,6 @@
                 <behavior>Required</behavior>
                 <field>Sunday__c</field>
             </layoutItems>
-
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
