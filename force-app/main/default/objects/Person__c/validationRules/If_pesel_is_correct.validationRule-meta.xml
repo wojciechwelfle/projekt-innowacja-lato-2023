@@ -2,70 +2,20 @@
 <ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>If_pesel_is_correct</fullName>
     <active>true</active>
-    <errorConditionFormula>REGEX(Personal_ID_Number__c , &quot;[0-9]+&quot;) = FALSE ||   LEN(Personal_ID_Number__c )  &lt;&gt; 11 || VALUE(MID(Personal_ID_Number__c,5,2))&lt;31 || NOT(
-    OR(
-        MID(Personal_ID_Number__c, 3, 2) = &apos;81&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;82&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;83&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;84&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;85&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;86&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;87&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;88&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;89&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;90&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;91&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;92&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;01&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;02&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;03&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;04&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;05&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;06&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;07&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;08&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;09&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;10&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;11&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;12&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;21&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;22&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;23&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;24&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;25&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;26&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;27&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;28&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;29&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;30&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;31&apos;,
-	MID(Personal_ID_Number__c, 3, 2) = &apos;32&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;41&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;42&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;43&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;44&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;45&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;46&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;47&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;48&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;49&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;50&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;51&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;52&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;61&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;62&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;63&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;64&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;65&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;66&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;67&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;68&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;69&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;70&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;71&apos;,
-        MID(Personal_ID_Number__c, 3, 2) = &apos;72&apos;
-    )
-)</errorConditionFormula>
+    <errorConditionFormula>REGEX(Personal_ID_Number__c , &quot;\\D&quot;) = TRUE ||   LEN(Personal_ID_Number__c )  &lt;&gt; 11 || VALUE(MID(Personal_ID_Number__c,5,2))&gt;31 ||( 
+81&lt;=VALUE(MID(Personal_ID_Number__c,2,2)) &amp;&amp; VALUE(MID(Personal_ID_Number__c,2,2))&lt;= 92 )||
+
+( 1&lt;=VALUE(MID(Personal_ID_Number__c,2,2)) &amp;&amp; VALUE(MID(Personal_ID_Number__c,2,2))&lt;= 12 &amp;&amp; 
+ISBLANK( DATE(1900+VALUE(MID(Personal_ID_Number__c,1,2)) , VALUE(MID(Personal_ID_Number__c,3,2)) , VALUE(MID(Personal_ID_Number__c,5,2)) ))) ||
+
+( 21&lt;=VALUE(MID(Personal_ID_Number__c,2,2)) &amp;&amp; VALUE(MID(Personal_ID_Number__c,2,2))&lt;= 32 &amp;&amp; 
+ISBLANK( DATE(2000+VALUE(MID(Personal_ID_Number__c,1,2)) , VALUE(MID(Personal_ID_Number__c,3,2))-20 , VALUE(MID(Personal_ID_Number__c,5,2)) ))) ||
+
+( 41&lt;=VALUE(MID(Personal_ID_Number__c,2,2)) &amp;&amp; VALUE(MID(Personal_ID_Number__c,2,2))&lt;= 52 &amp;&amp; 
+ISBLANK( DATE(2100+VALUE(MID(Personal_ID_Number__c,1,2)) , VALUE(MID(Personal_ID_Number__c,3,2))-40 , VALUE(MID(Personal_ID_Number__c,5,2)) ))) ||
+
+( 61&lt;=VALUE(MID(Personal_ID_Number__c,2,2)) &amp;&amp; VALUE(MID(Personal_ID_Number__c,2,2))&lt;= 72 &amp;&amp; 
+ISBLANK( DATE(2200+VALUE(MID(Personal_ID_Number__c,1,2)) , VALUE(MID(Personal_ID_Number__c,3,2))-60 , VALUE(MID(Personal_ID_Number__c,5,2)) )))</errorConditionFormula>
     <errorDisplayField>Personal_ID_Number__c</errorDisplayField>
     <errorMessage>Personal ID is incorrect!</errorMessage>
 </ValidationRule>
