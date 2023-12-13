@@ -1,10 +1,11 @@
 global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable, Database.Batchable<SObject>, Database.Stateful {
     
     public static final String JOB_NAME = 'Open Hours Update Job';
-    
+    private final Map<String, List<String>> errorToIDs = new Map<String, List<String>>();
     //Codziennie o 5 rano
     public static final String CRON_TIME = '0 0 5 * * ?';
-    Exception[] errors = new Exception[0];
+    @TestVisible
+    private static Boolean shouldForceException = false;
 
 
     public static Id scheduleMe() {
@@ -30,36 +31,51 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
         );
     }
 
-    public void execute(Database.BatchableContext bc, List<Medical_Facility__c> facilities) { 
-      try{       
-        for (Medical_Facility__c facility : facilities) {
-            facility.Monday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-            facility.Tuesday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-            facility.Wednesday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-            facility.Thursday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-            facility.Friday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-            facility.Saturday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-            facility.Sunday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-        }
+    public void execute(Database.BatchableContext bc, List<Medical_Facility__c> facilities) {  
+      for (Medical_Facility__c facility : facilities) {
+          facility.Monday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+          facility.Tuesday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+          facility.Wednesday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+          facility.Thursday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+          facility.Friday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+          facility.Saturday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+          facility.Sunday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+      }
 
-        if (!facilities.isEmpty()) {
-            update facilities;
+      if ((Test.isRunningTest() && shouldForceException)) {
+        facilities[0].Monday__c = ' 12:00-12:30 2';
+        // facilities[0].Monday__c = 2;
+    } 
+      
+      Database.SaveResult[] fac = Database.update(facilities, false);
+      for (Integer i = 0; i < fac.size(); i++) {
+        if (!fac[i].isSuccess()) {
+          String statusCode = fac[i].getErrors().get(0).getStatusCode().name();
+          if (!errorToIDs.containsKey(statusCode)) {
+            errorToIDs.put(statusCode, new List<String>());
+          }
+          errorToIDs.get(statusCode).add(facilities[i].Id);
         }
-      } catch(Exception e) {
-            errors.add(e);
       }
     }
 
-    public void finish(Database.BatchableContext bc){
-      if(!errors.isEmpty()) {
+    public void finish(Database.BatchableContext bc) {
+      if (!errorToIDs.isEmpty()) {
+          sendErrorEmail();
+      }
+    }
+
+    private void sendErrorEmail() {
         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
         mail.setSubject('Errors occurred during batch process.');
         mail.setTargetObjectId(UserInfo.getUserId());
         mail.setSaveAsActivity(false);
-        String body = String.valueOf(errors);
-        mail.setPlainTextBody(body);
-        Messaging.sendEmail(new Messaging.Email[] { mail });
+        List<String> body = new List<String>();
+        for (String statusCode : errorToIDs.keySet()) {
+            body.add('Status Code: ' + statusCode + ', Facility IDs: ' + 'error: ' + errorToIDs.get(statusCode));
         }
+        mail.setPlainTextBody(body.toString());
+        Messaging.sendEmail(new Messaging.Email[] { mail });
     }
 
     private static String generateOpenHours() {

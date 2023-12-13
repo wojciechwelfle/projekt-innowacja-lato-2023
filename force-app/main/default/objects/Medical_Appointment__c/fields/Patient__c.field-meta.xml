@@ -15,7 +15,6 @@
     <referenceTo>Person__c</referenceTo>
     <relationshipLabel>Medical Appointments (Patient)</relationshipLabel>
     <relationshipName>Medical_Appointment</relationshipName>
-    <relationshipOrder>0</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>
     <trackTrending>false</trackTrending>
     <type>MasterDetail</type>

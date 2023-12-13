@@ -107,7 +107,7 @@ public without sharing class RESTMedicalFacilitiesTests {
         List<Id> output = RESTMedicalFacilities.putMedicalFacilities();
         test.stopTest();
 
-        Assert.areEqual(output, idsList);
+        Assert.areEqual(idsList, output);
     }
 
     @isTest
@@ -126,7 +126,7 @@ public without sharing class RESTMedicalFacilitiesTests {
         RESTMedicalFacilities.postMedicalFacilities();
         test.stopTest();
 
-        Assert.areEqual(response.responseBody.toString(), '["Szpital dzieciecy","Izba pomocy"]');
+        Assert.areEqual('["Szpital dzieciecy","Izba pomocy"]', response.responseBody.toString());
     }
 
     @isTest
@@ -145,7 +145,27 @@ public without sharing class RESTMedicalFacilitiesTests {
         RESTMedicalFacilities.postMedicalFacilities();
         test.stopTest();
 
-        Assert.areEqual(response.responseBody.toString(), '["Szpital dzieciecy"]');
+        Assert.areEqual('["Szpital dzieciecy"]', response.responseBody.toString());
+    }
+
+    @isTest
+    private static void testPostMethodError() {
+        RestRequest request = new RestRequest();
+        request.requestURI = 'services/apexrest/Medical_Facility__c';
+        RestResponse response = new RestResponse();
+
+        request.requestBody = Blob.valueOf('{"fromDateTime":"2023-12-06 10:00:","toDateTime":"2023-12-06 13:00:00"}');
+
+        RestContext.request = request;
+        RestContext.response = response;
+
+
+        test.startTest();
+        RESTMedicalFacilities.postMedicalFacilities();
+        test.stopTest();
+
+        Assert.areEqual('{"error": "Invalid date/time: 2023-12-06 10:00:"}', response.responseBody.toString());
+        Assert.areEqual(403, response.statusCode);
     }
 
     @isTest
@@ -172,6 +192,51 @@ public without sharing class RESTMedicalFacilitiesTests {
              Assert.arenotEqual(facilities[i].Saturday__c, updatedFacilities[i].Saturday__c);
              Assert.arenotEqual(facilities[i].Sunday__c, updatedFacilities[i].Sunday__c);
         }
+    }
+
+    @IsTest
+    static void testScheduleMe() {
+      Test.startTest();
+      Id jobId = MedicalFacilityOpenHoursUpdate.scheduleMe();
+      Test.stopTest();
+  
+      CronTrigger cronTrigger = [
+        SELECT Id, CronExpression, CronJobDetail.Name
+        FROM CronTrigger
+        WHERE Id = :jobId
+      ];
+      Assert.areEqual(
+        MedicalFacilityOpenHoursUpdate.JOB_NAME,
+        cronTrigger.CronJobDetail.Name,
+        'Invalid job name'
+      );
+      Assert.areEqual(
+        MedicalFacilityOpenHoursUpdate.CRON_TIME,
+        cronTrigger.CronExpression,
+        'Inavlid cron expression'
+      );
+    }
+
+    @IsTest
+    static void testScheduleMeError() {
+        String sub = 'Errors occurred during batch process.';
+      MedicalFacilityOpenHoursUpdate.shouldForceException = true;
+      Test.startTest();
+      MedicalFacilityOpenHoursUpdate medical = new MedicalFacilityOpenHoursUpdate();
+      medical.execute(null);
+      Test.stopTest();
+  
+      List<EmailMessage> emails = [
+      SELECT TextBody, Subject, ToAddress, Id
+      FROM EmailMessage
+      WHERE Subject =: sub
+        ];
+
+        Assert.areEqual(1, emails.size());
+        Assert.areEqual(
+        sub,
+        emails[0].ToAddress
+        );
     }
 
 }

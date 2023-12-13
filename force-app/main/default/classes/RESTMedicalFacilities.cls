@@ -27,10 +27,8 @@ global with sharing class RESTMedicalFacilities {
             );     
         }
 
-        String responseBody = JSON.serialize(wrapper);
-
         RestContext.response.statusCode = 200;
-        RestContext.response.responseBody = Blob.valueOf(responseBody);
+        RestContext.response.responseBody = Blob.valueOf(JSON.serialize(wrapper));
     }
 
     @TestVisible
@@ -86,6 +84,7 @@ global with sharing class RESTMedicalFacilities {
         String jsonBody = RestContext.request.requestBody.toString();
 
         try {
+            //TODO: deserializeStrict
             List<MedicalFacilityWrapper> wrapperList = (List<MedicalFacilityWrapper>) JSON.deserialize(jsonBody, List<MedicalFacilityWrapper>.class);
             List<Id> wrapperIds = new List<Id>();
             for (MedicalFacilityWrapper wrapper : wrapperList) {
@@ -97,6 +96,8 @@ global with sharing class RESTMedicalFacilities {
             FROM Medical_Facility__c WHERE Id in :wrapperIds];
     
             Integer i = 0;
+
+            //TODO: mapa  ID -> obiekt
     
             for (Medical_Facility__c facility : facilities) {
                 MedicalFacilityWrapper wrapper = wrapperList[i];
@@ -142,9 +143,9 @@ global with sharing class RESTMedicalFacilities {
             Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c
             FROM Medical_Facility__c];
 
-            List<String> facilitiesNamesOpenedInCertainTime = new List<String>();
+            //TODO: dodac cos do query aby nie robic w petlach, porownac godziny w query, dynamic query na konkretne dni
 
-            
+            List<String> facilitiesNamesOpenedInCertainTime = new List<String>();
 
             for (Medical_Facility__c facility : facilities) {
                 
