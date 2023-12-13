@@ -1,6 +1,6 @@
 global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable, Database.Batchable<SObject>, Database.Stateful {
     
-    public static final String JOB_NAME = 'Return Reminder Job';
+    public static final String JOB_NAME = 'Open Hours Update Job';
     
     //Codziennie o 5 rano
     public static final String CRON_TIME = '0 0 5 * * ?';
