@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Doctor__c</fullName>
-    <deleteConstraint>Restrict</deleteConstraint>
+    <fullName>Patient__c</fullName>
     <externalId>false</externalId>
-    <label>Doctor</label>
+    <label>Patient</label>
     <lookupFilter>
         <active>true</active>
         <filterItems>
             <field>Person__c.RecordType.Name</field>
             <operation>equals</operation>
-            <value>&quot;Doctor&quot;</value>
+            <value>&quot;Patient&quot;</value>
         </filterItems>
         <isOptional>false</isOptional>
     </lookupFilter>
     <referenceTo>Person__c</referenceTo>
-    <relationshipLabel>Medical Appointments</relationshipLabel>
-    <relationshipName>Medical_Appointments</relationshipName>
-    <required>true</required>
+    <relationshipLabel>Medical Appointments (Patient)</relationshipLabel>
+    <relationshipName>Medical_Appointment</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
     <trackTrending>false</trackTrending>
-    <type>Lookup</type>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
 </CustomField>
