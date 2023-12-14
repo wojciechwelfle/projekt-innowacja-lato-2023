@@ -24,26 +24,20 @@ trigger SendAppointmentEmail on Medical_Appointment__c(
         person.Name +
         ' ' +
         person.Last_Name__c +
-        ',\n\n' +
-        'Your Medical Appointment has been updated!\nDetails from the visit:\n' +
-        '\tMedical Appointment Name: ' +
+        ',\n\nYour Medical Appointment has been updated!\nDetails from the visit:' +
+        '\n\tMedical Appointment Name: ' +
         appointments.get(person.Id).Name +
-        '\n' +
-        '\tPatient: ' +
+        '\n\tPatient: ' +
         person.Name +
         ' ' +
         person.Last_Name__c +
-        '\n' +
-        '\tAppointment Date: ' +
+        '\n\tAppointment Date: ' +
         appointments.get(person.Id).Appointment_Date__c.format() +
-        '\n' +
-        '\tAppointment Status: ' +
+        '\n\tAppointment Status: ' +
         appointments.get(person.Id).Appointment_Status__c +
-        '\n' +
-        '\tAppointment ID: ' +
+        '\n\tAppointment ID: ' +
         appointments.get(person.Id).Appointment_Id__c +
-        '\n\n' +
-        'If something is not correct, please contact us!\nHealth Care App Team'
+        '\n\nIf something is not correct, please contact us!\nHealth Care App Team'
     );
 
     emailsToSend.add(mail);
