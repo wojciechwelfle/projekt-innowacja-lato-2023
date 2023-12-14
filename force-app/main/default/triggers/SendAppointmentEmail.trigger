@@ -5,7 +5,6 @@ trigger SendAppointmentEmail on Medical_Appointment__c(
   Map<Id, Medical_Appointment__c> appointments = new Map<Id, Medical_Appointment__c>();
   for (Medical_Appointment__c appointment : Trigger.new) {
     appointments.put(appointment.Patient__c, appointment);
-    facilitiesIds.add(appointment.Medical_Facility__c);
   }
 
   List<Person__c> persons = [
