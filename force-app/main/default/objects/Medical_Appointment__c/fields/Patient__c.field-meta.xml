@@ -6,7 +6,7 @@
     <lookupFilter>
         <active>true</active>
         <filterItems>
-            <field>Person__c.RecordType.DeveloperName</field>
+            <field>Person__c.RecordType.Name</field>
             <operation>equals</operation>
             <value>&quot;Patient&quot;</value>
         </filterItems>
