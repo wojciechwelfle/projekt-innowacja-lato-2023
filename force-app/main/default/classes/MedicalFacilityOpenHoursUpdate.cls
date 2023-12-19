@@ -86,9 +86,11 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
         Integer closeHour = (openHour + randomH > 24 ? openHour + randomH - 24 : openHour + randomH);
         Integer closeMinute = (Integer)Math.floor(Math.random() * 60);
 
+        String openHString = (openHour < 10 ? '0' + String.valueOf(openHour) : String.valueOf(openHour));
+        String closeHString = (closeHour < 10 ? '0' + String.valueOf(closeHour) : String.valueOf(closeHour));
         String openMinuteString = (openMinute < 10 ? '0' + String.valueOf(openMinute) : String.valueOf(openMinute));
         String closeMinuteString = (closeMinute < 10 ? '0' + String.valueOf(closeMinute) : String.valueOf(closeMinute));
 
-        return String.valueOf(openHour) + ':' + openMinuteString + '-' + String.valueOf(closeHour) + ':' + closeMinuteString;
+        return openHString + ':' + openMinuteString + '-' + closeHString + ':' + closeMinuteString;
     }
 }
