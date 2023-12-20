@@ -118,63 +118,63 @@ public without sharing class RESTMedicalFacilitiesTests {
         Assert.areEqual(idsList, output);
     }
 
-    // @isTest
-    // private static void testPostMethod() {
-    //     RestRequest request = new RestRequest();
-    //     request.requestURI = 'services/apexrest/Medical_Facility__c';
-    //     RestResponse response = new RestResponse();
+    @isTest
+    private static void testPostMethod() {
+        RestRequest request = new RestRequest();
+        request.requestURI = 'services/apexrest/Medical_Facility__c';
+        RestResponse response = new RestResponse();
 
-    //     request.requestBody = Blob.valueOf('{"fromDateTime":"2023-12-07 10:00:00","toDateTime":"2023-12-07 17:00:00"}');
+        request.requestBody = Blob.valueOf('{"fromDateTime":"2023-12-07 10:00:00","toDateTime":"2023-12-07 17:00:00"}');
 
-    //     RestContext.request = request;
-    //     RestContext.response = response;
-
-
-    //     test.startTest();
-    //     RESTMedicalFacilities.postMedicalFacilities();
-    //     test.stopTest();
-
-    //     Assert.areEqual('["Szpital dzieciecy","Izba pomocy"]', response.responseBody.toString());
-    // }
-
-    // @isTest
-    // private static void testPostMethodOneFacility() {
-    //     RestRequest request = new RestRequest();
-    //     request.requestURI = 'services/apexrest/Medical_Facility__c';
-    //     RestResponse response = new RestResponse();
-
-    //     request.requestBody = Blob.valueOf('{"fromDateTime":"2023-12-06 10:00:00","toDateTime":"2023-12-06 13:00:00"}');
-
-    //     RestContext.request = request;
-    //     RestContext.response = response;
+        RestContext.request = request;
+        RestContext.response = response;
 
 
-    //     test.startTest();
-    //     RESTMedicalFacilities.postMedicalFacilities();
-    //     test.stopTest();
+        test.startTest();
+        RESTMedicalFacilities.postMedicalFacilities();
+        test.stopTest();
 
-    //     Assert.areEqual('["Szpital dzieciecy"]', response.responseBody.toString());
-    // }
+        Assert.areEqual('["Szpital dzieciecy","Izba pomocy"]', response.responseBody.toString());
+    }
 
-    // @isTest
-    // private static void testPostMethodError() {
-    //     RestRequest request = new RestRequest();
-    //     request.requestURI = 'services/apexrest/Medical_Facility__c';
-    //     RestResponse response = new RestResponse();
+    @isTest
+    private static void testPostMethodOneFacility() {
+        RestRequest request = new RestRequest();
+        request.requestURI = 'services/apexrest/Medical_Facility__c';
+        RestResponse response = new RestResponse();
 
-    //     request.requestBody = Blob.valueOf('{"fromDateTime":"2023-12-06 10:00:","toDateTime":"2023-12-06 13:00:00"}');
+        request.requestBody = Blob.valueOf('{"fromDateTime":"2023-12-06 10:00:00","toDateTime":"2023-12-06 13:00:00"}');
 
-    //     RestContext.request = request;
-    //     RestContext.response = response;
+        RestContext.request = request;
+        RestContext.response = response;
 
 
-    //     test.startTest();
-    //     RESTMedicalFacilities.postMedicalFacilities();
-    //     test.stopTest();
+        test.startTest();
+        RESTMedicalFacilities.postMedicalFacilities();
+        test.stopTest();
 
-    //     Assert.areEqual('{"error": "Invalid date/time: 2023-12-06 10:00:"}', response.responseBody.toString());
-    //     Assert.areEqual(403, response.statusCode);
-    // }
+        Assert.areEqual('["Szpital dzieciecy"]', response.responseBody.toString());
+    }
+
+    @isTest
+    private static void testPostMethodError() {
+        RestRequest request = new RestRequest();
+        request.requestURI = 'services/apexrest/Medical_Facility__c';
+        RestResponse response = new RestResponse();
+
+        request.requestBody = Blob.valueOf('{"fromDateTime":"2023-12-06 10:00:","toDateTime":"2023-12-06 13:00:00"}');
+
+        RestContext.request = request;
+        RestContext.response = response;
+
+
+        test.startTest();
+        RESTMedicalFacilities.postMedicalFacilities();
+        test.stopTest();
+
+        Assert.areEqual('{"error": "Invalid date/time: 2023-12-06 10:00:"}', response.responseBody.toString());
+        Assert.areEqual(403, response.statusCode);
+    }
 
     // @isTest
     // private static void testSchedulableOpenHoursUpdate() {

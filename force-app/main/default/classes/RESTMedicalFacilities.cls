@@ -132,15 +132,14 @@ global with sharing class RESTMedicalFacilities {
                 result = Database.query(query);
             }
 
-            Map<Id, String> resultNameAndId = new Map<Id, String>();
+            List<String> resultName = new List<String>();
             for (Medical_Facility__c fac : result) {
-                resultNameAndId.put(fac.Id, fac.Name);
+                resultName.add(fac.Name);
             }
 
             RestResponse res = RestContext.response;
             res.statusCode = 200;
-            System.debug(JSON.serialize(resultNameAndId));
-            res.responseBody = Blob.valueOf(JSON.serialize(resultNameAndId));
+            res.responseBody = Blob.valueOf(JSON.serialize(resultName));
         } catch (JSONException e) {
             RestContext.response.responseBody = Blob.valueOf('{"error": "' + e.getMessage() + '"}');
             RestContext.response.statusCode = 400;
@@ -186,20 +185,37 @@ global with sharing class RESTMedicalFacilities {
 
     public static String createCriterias(List<String> days, DateTime fromOpenHours, DateTime toOpenHours) {
         String criteria = '';
-        System.debug(days);
-        System.debug(days.size());
-        for (String day : days) {
+
+        Integer numberOfDays = days.size();
+        for (Integer i = 0 ; i < numberOfDays; ++i) {
             Time openHours;
             Time closeHours;
-
-            if(days.size() == 1) {
+            
+           
+            if(i == 0) {
                 openHours = Time.newInstance(fromOpenHours.hour(), fromOpenHours.minute(), 0 ,0);
+                if(numberOfDays == 1) {
+                    closeHours = Time.newInstance(toOpenHours.hour(), toOpenHours.minute(), 0 ,0);
+                } else {
+                    closeHours = Time.newInstance(23, 59, 0 ,0);
+                }
+                
+                criteria = ' WHERE (' + days[i] + '_Open_Hours__c < ' + String.valueOf(closeHours) + ' AND ' + days[i] + '_Close_Hours__c > ' + String.valueOf(openHours) + ')';
+            } else if(numberOfDays - 1 == i) {
+                openHours = Time.newInstance(0, 0, 0 ,0);
                 closeHours = Time.newInstance(toOpenHours.hour(), toOpenHours.minute(), 0 ,0);
-                criteria = 
-                ' WHERE ' + day + '_Open_Hours__c < ' + String.valueOf(closeHours) + ' AND ' + day + '_Close_Hours__c > ' + String.valueOf(openHours);
+
+                criteria += ' OR (' + days[i] + '_Open_Hours__c < ' + String.valueOf(closeHours) + ' AND ' + days[i] + '_Close_Hours__c > ' + String.valueOf(openHours) + ')';
+            } else {
+                openHours = Time.newInstance(0, 0, 0 ,0);
+                closeHours = Time.newInstance(23, 59, 0 ,0);
+
+                criteria += ' OR (' + days[i] + '_Open_Hours__c < ' + String.valueOf(closeHours) + ' AND ' + days[i] + '_Close_Hours__c > ' + String.valueOf(openHours) + ')';
             }
+                        
         }
 
+        criteria = String.escapeSingleQuotes(criteria);
         return criteria;
     }
     
