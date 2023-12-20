@@ -25,7 +25,8 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
         return Database.getQueryLocator(
           [
             SELECT Id, 
-            Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c
+            Monday_Open_Hours__c, Tuesday_Open_Hours__c, Wednesday_Open_Hours__c, Thursday_Open_Hours__c, Friday_Open_Hours__c, Saturday_Open_Hours__c, Sunday_Open_Hours__c,
+            Monday_Close_Hours__c, Tuesday_Close_Hours__c, Wednesday_Close_Hours__c, Thursday_Close_Hours__c, Friday_Close_Hours__c, Saturday_Close_Hours__c, Sunday_Close_Hours__c
             FROM Medical_Facility__c
           ]
         );
@@ -33,17 +34,30 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
 
     public void execute(Database.BatchableContext bc, List<Medical_Facility__c> facilities) {  
       for (Medical_Facility__c facility : facilities) {
-          facility.Monday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-          facility.Tuesday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-          facility.Wednesday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-          facility.Thursday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-          facility.Friday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-          facility.Saturday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
-          facility.Sunday__c = MedicalFacilityOpenHoursUpdate.generateOpenHours();
+        facility.Monday_Open_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(true);
+        facility.Monday_Close_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(false);
+
+        facility.Tuesday_Open_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(true);
+        facility.Tuesday_Close_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(false);
+
+        facility.Wednesday_Open_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(true);
+        facility.Wednesday_Close_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(false);
+
+        facility.Thursday_Open_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(true);
+        facility.Thursday_Close_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(false);
+
+        facility.Friday_Open_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(true);
+        facility.Friday_Close_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(false);
+
+        facility.Saturday_Open_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(true);
+        facility.Saturday_Close_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(false);
+
+        facility.Sunday_Open_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(true);
+        facility.Sunday_Close_Hours__c = MedicalFacilityOpenHoursUpdate.generateOpenHours(false);
       }
 
       if ((Test.isRunningTest() && shouldForceException)) {
-        facilities[0].Monday__c = ' 12:00-12:30 2';
+        // facilities[0].Monday__c = ' 12:00-12:30 2';
         // facilities[0].Monday__c = 2;
     } 
       
@@ -66,6 +80,7 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
     }
 
     private void sendErrorEmail() {
+      //TODO: EMAILMANAGER class
         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
         mail.setSubject('Errors occurred during batch process.');
         mail.setTargetObjectId(UserInfo.getUserId());
@@ -78,19 +93,9 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
         Messaging.sendEmail(new Messaging.Email[] { mail });
     }
 
-    private static String generateOpenHours() {
-        Integer openHour = (Integer)Math.floor(Math.random() * 24);
-        Integer openMinute = (Integer)Math.floor(Math.random() * 60);
-
-        Integer randomH = 8 + (Integer)Math.floor(Math.random() * (13 - 8));
-        Integer closeHour = (openHour + randomH > 24 ? openHour + randomH - 24 : openHour + randomH);
-        Integer closeMinute = (Integer)Math.floor(Math.random() * 60);
-
-        String openHString = (openHour < 10 ? '0' + String.valueOf(openHour) : String.valueOf(openHour));
-        String closeHString = (closeHour < 10 ? '0' + String.valueOf(closeHour) : String.valueOf(closeHour));
-        String openMinuteString = (openMinute < 10 ? '0' + String.valueOf(openMinute) : String.valueOf(openMinute));
-        String closeMinuteString = (closeMinute < 10 ? '0' + String.valueOf(closeMinute) : String.valueOf(closeMinute));
-
-        return openHString + ':' + openMinuteString + '-' + closeHString + ':' + closeMinuteString;
+    private static Time generateOpenHours(Boolean openHours) {
+      return openHours == true ? 
+      Time.newInstance(Math.round(Math.random() * 4) + 8, (Integer)Math.floor(Math.random() * 60), 0, 0) :
+      Time.newInstance(Math.round(Math.random() * 4) + 18, (Integer)Math.floor(Math.random() * 60), 0, 0);
     }
 }
