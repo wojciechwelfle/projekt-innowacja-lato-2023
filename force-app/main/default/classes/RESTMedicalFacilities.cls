@@ -122,33 +122,25 @@ global with sharing class RESTMedicalFacilities {
 
             DateTime fromDateTime = DateTime.valueOf(wrapper.fromDateTime);
             DateTime toDateTime = DateTime.valueOf(wrapper.toDateTime);
-
-            List<String> daysofWeek = RESTMedicalFacilities.getDaysOfWeekBetweenDatesString(fromDateTime, toDateTime);
-
+            List<String> daysofWeek = RESTMedicalFacilities.getDaysOfWeekBetweenDates(fromDateTime, toDateTime);
             String query = 'SELECT Id, Name FROM Medical_Facility__c';
 
-            String fromDateTimeString = String.valueOf(fromDateTime.hour()) + ':' + String.valueOf(fromDateTime.minute());
-            String toDateTimeString = String.valueOf(toDateTime.hour()) + ':' + String.valueOf(toDateTime.minute());
-
-            String criteria = RESTMedicalFacilities.createCriterias(daysOfWeek, fromDateTimeString, toDateTimeString);
+            String criteria = RESTMedicalFacilities.createCriterias(daysOfWeek, fromDateTime, toDateTime);
             List<Medical_Facility__c> result;
             if(criteria != '') {
                 query += criteria;
                 result = Database.query(query);
             }
 
-            // List<Medical_Facility__c> listss = [
-            //     select Id, Name FROM Medical_Facility__c where TIMEVALUE(SUBSTRING(Monday__c, 5)) <= TIMEVALUE(10:00) OR TIMEVALUE(SUBSTRING(Monday__c, 5)) <= TIMEVALUE(10:00)
-            // ];
-
-            // select Id, Name, SUBSTRING(Monday__c from 1 for 5) as a FROM Medical_Facility__c
-            
-            // List<Medical_Facility__c> facilities = [SELECT Id, SUBSTRING(Name) FROM Medical_Facility__c group by Name];
-            //TODO: dodac cos do query aby nie robic w petlach, porownac godziny w query, dynamic query na konkretne dni
+            Map<Id, String> resultNameAndId = new Map<Id, String>();
+            for (Medical_Facility__c fac : result) {
+                resultNameAndId.put(fac.Id, fac.Name);
+            }
 
             RestResponse res = RestContext.response;
             res.statusCode = 200;
-            res.responseBody = Blob.valueOf(JSON.serialize(result));
+            System.debug(JSON.serialize(resultNameAndId));
+            res.responseBody = Blob.valueOf(JSON.serialize(resultNameAndId));
         } catch (JSONException e) {
             RestContext.response.responseBody = Blob.valueOf('{"error": "' + e.getMessage() + '"}');
             RestContext.response.statusCode = 400;
@@ -170,47 +162,41 @@ global with sharing class RESTMedicalFacilities {
         return output;
     }
 
-    public static Map<String, Integer> getDaysOfWeekBetweenDates(DateTime fromDateTime, DateTime toDateTime) {
-        Map<String, Integer> dayMap = new Map<String, Integer>();
+    public static List<String> getDaysOfWeekBetweenDates(DateTime fromDateTime, DateTime toDateTime) {
+        List<String> dayList = new List<String>();
     
-        while (fromDateTime <= toDateTime || dayMap.size() != 7) {
+        while (true) {
+            if(dayList.size() == 7) {
+                break;
+            }
             String dayOfWeek = fromDateTime.format('EEEE');
             Integer dayOfMonth = fromDateTime.day();
+            System.debug(dayOfWeek);
     
-            dayMap.put(dayOfWeek, dayOfMonth);
-    
+            dayList.add(dayOfWeek);
+            
+            if(fromDateTime.format('EEEE') == toDateTime.format('EEEE')) {
+                break;
+            }
             fromDateTime = fromDateTime.addDays(1);
         }
     
-        return dayMap;
+        return dayList;
     }
 
-    public static List<String> getDaysOfWeekBetweenDatesString(DateTime fromDateTime, DateTime toDateTime) {
-        List<String> days = new List<String>();
-        
-        Integer counter = 0;
-        while (fromDateTime <= toDateTime || counter != 7) {
-            String dayOfWeek = fromDateTime.format('EEEE');
-            Integer dayOfMonth = fromDateTime.day();
-    
-            days.add(dayOfWeek + '__c, ');
-    
-            fromDateTime = fromDateTime.addDays(1);
-            counter++;
-        }
-    
-        return days;
-    }
-
-    public static String createCriterias(List<String> days, String fromOpenHours, String toOpenHours) {
+    public static String createCriterias(List<String> days, DateTime fromOpenHours, DateTime toOpenHours) {
         String criteria = '';
+        System.debug(days);
+        System.debug(days.size());
         for (String day : days) {
+            Time openHours;
+            Time closeHours;
 
             if(days.size() == 1) {
-                Time t = Time.newInstance(12, 0, 0 ,0);
+                openHours = Time.newInstance(fromOpenHours.hour(), fromOpenHours.minute(), 0 ,0);
+                closeHours = Time.newInstance(toOpenHours.hour(), toOpenHours.minute(), 0 ,0);
                 criteria = 
-                ' WHERE Monday_Open_Hours__c < :t OR' +
-                'TIMEVALUE(SUBSTRING(FIND(day), 5)) <= TIMEVALUE(' + fromOpenHours + ')';
+                ' WHERE ' + day + '_Open_Hours__c < ' + String.valueOf(closeHours) + ' AND ' + day + '_Close_Hours__c > ' + String.valueOf(openHours);
             }
         }
 
