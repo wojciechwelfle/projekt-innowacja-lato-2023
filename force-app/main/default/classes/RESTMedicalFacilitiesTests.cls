@@ -244,9 +244,9 @@ public without sharing class RESTMedicalFacilitiesTests {
     static void testScheduleMeError() {
         //TODO: EMAILMANAGER class
         String sub = 'Errors occurred during batch process.';
+        MedicalFacilityOpenHoursUpdate medical = new MedicalFacilityOpenHoursUpdate();
         MedicalFacilityOpenHoursUpdate.shouldForceException = true;
         Test.startTest();
-        MedicalFacilityOpenHoursUpdate medical = new MedicalFacilityOpenHoursUpdate();
         medical.execute(null);
         Test.stopTest();
     

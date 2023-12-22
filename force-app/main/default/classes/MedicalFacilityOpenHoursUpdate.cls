@@ -5,7 +5,7 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
     //Codziennie o 5 rano
     public static final String CRON_TIME = '0 0 5 * * ?';
     @TestVisible
-    private static Boolean shouldForceException = false;
+    public static Boolean shouldForceException = false;
 
 
     public static Id scheduleMe() {
@@ -57,8 +57,8 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
       }
 
       if ((Test.isRunningTest() && shouldForceException)) {
-        // facilities[0].Monday__c = ' 12:00-12:30 2';
-        // facilities[0].Monday__c = 2;
+        facilities[0].Sunday_Open_Hours__c = Time.newInstance(21,0,0,0);
+        facilities[0].Sunday_Close_Hours__c = Time.newInstance(8,0,0,0);
     } 
       
       Database.SaveResult[] fac = Database.update(facilities, false);
@@ -74,23 +74,12 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
     }
 
     public void finish(Database.BatchableContext bc) {
+      System.debug(errorToIDs);
       if (!errorToIDs.isEmpty()) {
-          sendErrorEmail();
+        EmailManager.sendErrorEmail('Errors occurred during batch process.', errorToIDs);
+      } else {
+        EmailManager.sendEmail('lalala', 'nic nie ma w errorze');
       }
-    }
-
-    private void sendErrorEmail() {
-      //TODO: EMAILMANAGER class
-        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-        mail.setSubject('Errors occurred during batch process.');
-        mail.setTargetObjectId(UserInfo.getUserId());
-        mail.setSaveAsActivity(false);
-        List<String> body = new List<String>();
-        for (String statusCode : errorToIDs.keySet()) {
-            body.add('Status Code: ' + statusCode + ', Facility IDs: ' + 'error: ' + errorToIDs.get(statusCode));
-        }
-        mail.setPlainTextBody(body.toString());
-        Messaging.sendEmail(new Messaging.Email[] { mail });
     }
 
     private static Time generateOpenHours(Boolean openHours) {
