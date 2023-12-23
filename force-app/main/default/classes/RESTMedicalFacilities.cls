@@ -150,17 +150,6 @@ global with sharing class RESTMedicalFacilities {
         
     }
 
-
-    public static List<Integer> getOpenAndCloseHoursAndMinutes(String openHoursAndCloseHours) {
-        List<Integer> output = new List<Integer>();
-
-        for (String part : openHoursAndCloseHours.split(':|-')) {
-            output.add(Integer.valueOf(part));
-        }     
-
-        return output;
-    }
-
     public static List<String> getDaysOfWeekBetweenDates(DateTime fromDateTime, DateTime toDateTime) {
         List<String> dayList = new List<String>();
     
