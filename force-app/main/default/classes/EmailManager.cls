@@ -16,7 +16,7 @@
     public static void sendEmail(String subject, String body) {
         Messaging.sendEmail(
           new Messaging.Email[] {EmailManager.createSingleEmail(
-                '240810@edu.p.lodz.pl', body, subject
+              UserInfo.getUserEmail(), body, subject
             )}
         );
     }
@@ -29,8 +29,7 @@
         }
         Messaging.sendEmail(
           new Messaging.Email[] {EmailManager.createSingleEmail(
-            //pobrać maila z orga
-                '240810@edu.p.lodz.pl', body.toString(), subject
+              UserInfo.getUserEmail(), body.toString(), subject
             )}
         );
     }

@@ -74,11 +74,8 @@ global with sharing class MedicalFacilityOpenHoursUpdate implements Schedulable,
     }
 
     public void finish(Database.BatchableContext bc) {
-      System.debug(errorToIDs);
       if (!errorToIDs.isEmpty()) {
         EmailManager.sendErrorEmail('Errors occurred during batch process.', errorToIDs);
-      } else {
-        EmailManager.sendEmail('lalala', 'nic nie ma w errorze');
       }
     }
 
