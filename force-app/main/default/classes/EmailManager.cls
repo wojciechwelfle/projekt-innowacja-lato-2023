@@ -29,6 +29,7 @@
         }
         Messaging.sendEmail(
           new Messaging.Email[] {EmailManager.createSingleEmail(
+            //pobrać maila z orga
                 '240810@edu.p.lodz.pl', body.toString(), subject
             )}
         );
