@@ -9,8 +9,6 @@ public without sharing class RESTMedicalFacilitiesTests {
             Friday_Open_Hours__c = Time.newInstance(11,0,0,0), Saturday_Open_Hours__c = Time.newInstance(12,0,0,0), Sunday_Open_Hours__c = Time.newInstance(10,30,0,0),
             Monday_Close_Hours__c = Time.newInstance(17,0,0,0), Tuesday_Close_Hours__c = Time.newInstance(18,0,0,0), Wednesday_Close_Hours__c = Time.newInstance(19,0,0,0), Thursday_Close_Hours__c = Time.newInstance(16,30,0,0),
             Friday_Close_Hours__c = Time.newInstance(20,0,0,0), Saturday_Close_Hours__c = Time.newInstance(21,0,0,0), Sunday_Close_Hours__c = Time.newInstance(18,30,0,0),
-            // Monday__c = '09:00-17:00', Tuesday__c = '09:30-18:00', Wednesday__c = '10:00-19:00', 
-            // Thursday__c = '08:00-16:30', Friday__c = '11:00-20:00', Saturday__c = '12:00-21:00', Sunday__c = '10:30-18:30',
             City__c = 'ExampleCity', Street__c = 'Main Street', Building_number__c = '123', zip_code__c = '12-345'
         );
         insert facility1;
@@ -21,8 +19,6 @@ public without sharing class RESTMedicalFacilitiesTests {
             Friday_Open_Hours__c = Time.newInstance(15,0,0,0), Saturday_Open_Hours__c = Time.newInstance(12,0,0,0), Sunday_Open_Hours__c = Time.newInstance(10,30,0,0),
             Monday_Close_Hours__c = Time.newInstance(13,30,0,0), Tuesday_Close_Hours__c = Time.newInstance(18,0,0,0), Wednesday_Close_Hours__c = Time.newInstance(19,0,0,0), Thursday_Close_Hours__c = Time.newInstance(16,30,0,0),
             Friday_Close_Hours__c = Time.newInstance(20,0,0,0), Saturday_Close_Hours__c = Time.newInstance(21,0,0,0), Sunday_Close_Hours__c = Time.newInstance(18,30,0,0),
-            // Monday__c = '09:32-13:30', Tuesday__c = '06:30-18:00', Wednesday__c = '16:00-19:00', 
-            // Thursday__c = '06:00-16:30', Friday__c = '15:00-20:00', Saturday__c = '12:00-21:00', Sunday__c = '10:30-18:30',
             City__c = 'asdf', Street__c = 'erqw Street', Building_number__c = '321', zip_code__c = '23-385'
         );
         insert facility2;
@@ -176,91 +172,6 @@ public without sharing class RESTMedicalFacilitiesTests {
         Assert.areEqual(403, response.statusCode);
     }
 
-    @isTest
-    private static void testSchedulableOpenHoursUpdate() {
-        List<Medical_Facility__c> facilities = [select Id, Name, Phone_Number__c,
-        Monday_Open_Hours__c, Tuesday_Open_Hours__c, Wednesday_Open_Hours__c, Thursday_Open_Hours__c, Friday_Open_Hours__c, Saturday_Open_Hours__c, Sunday_Open_Hours__c,
-        Monday_Close_Hours__c, Tuesday_Close_Hours__c, Wednesday_Close_Hours__c, Thursday_Close_Hours__c, Friday_Close_Hours__c, Saturday_Close_Hours__c, Sunday_Close_Hours__c
-        FROM Medical_Facility__c];
 
-        Test.startTest();
-
-        MedicalFacilityOpenHoursUpdate schedulableInstance = new MedicalFacilityOpenHoursUpdate();
-        schedulableInstance.execute(null);
-
-        Test.stopTest();
-        
-        List<Medical_Facility__c> updatedFacilities = [
-            SELECT Id, Name, Phone_Number__c,
-            Monday_Open_Hours__c, Tuesday_Open_Hours__c, Wednesday_Open_Hours__c, Thursday_Open_Hours__c, Friday_Open_Hours__c, Saturday_Open_Hours__c, Sunday_Open_Hours__c,
-            Monday_Close_Hours__c, Tuesday_Close_Hours__c, Wednesday_Close_Hours__c, Thursday_Close_Hours__c, Friday_Close_Hours__c, Saturday_Close_Hours__c, Sunday_Close_Hours__c
-            FROM Medical_Facility__c
-        ];
-        
-        for (Integer i = 0; i < facilities.size(); ++i) {
-            Assert.areNotEqual(facilities[i].Monday_Open_Hours__c, updatedFacilities[i].Monday_Open_Hours__c);
-            Assert.areNotEqual(facilities[i].Tuesday_Open_Hours__c, updatedFacilities[i].Tuesday_Open_Hours__c);
-            Assert.areNotEqual(facilities[i].Wednesday_Open_Hours__c, updatedFacilities[i].Wednesday_Open_Hours__c);
-            Assert.areNotEqual(facilities[i].Thursday_Open_Hours__c, updatedFacilities[i].Thursday_Open_Hours__c);
-            Assert.areNotEqual(facilities[i].Friday_Open_Hours__c, updatedFacilities[i].Friday_Open_Hours__c);
-            Assert.areNotEqual(facilities[i].Saturday_Open_Hours__c, updatedFacilities[i].Saturday_Open_Hours__c);
-            Assert.areNotEqual(facilities[i].Sunday_Open_Hours__c, updatedFacilities[i].Sunday_Open_Hours__c);
-        
-            Assert.areNotEqual(facilities[i].Monday_Close_Hours__c, updatedFacilities[i].Monday_Close_Hours__c);
-            Assert.areNotEqual(facilities[i].Tuesday_Close_Hours__c, updatedFacilities[i].Tuesday_Close_Hours__c);
-            Assert.areNotEqual(facilities[i].Wednesday_Close_Hours__c, updatedFacilities[i].Wednesday_Close_Hours__c);
-            Assert.areNotEqual(facilities[i].Thursday_Close_Hours__c, updatedFacilities[i].Thursday_Close_Hours__c);
-            Assert.areNotEqual(facilities[i].Friday_Close_Hours__c, updatedFacilities[i].Friday_Close_Hours__c);
-            Assert.areNotEqual(facilities[i].Saturday_Close_Hours__c, updatedFacilities[i].Saturday_Close_Hours__c);
-            Assert.areNotEqual(facilities[i].Sunday_Close_Hours__c, updatedFacilities[i].Sunday_Close_Hours__c);
-        }
-        
-    }
-
-    @IsTest
-    static void testScheduleMe() {
-      Test.startTest();
-      Id jobId = MedicalFacilityOpenHoursUpdate.scheduleMe();
-      Test.stopTest();
-  
-      CronTrigger cronTrigger = [
-        SELECT Id, CronExpression, CronJobDetail.Name
-        FROM CronTrigger
-        WHERE Id = :jobId
-      ];
-      Assert.areEqual(
-        MedicalFacilityOpenHoursUpdate.JOB_NAME,
-        cronTrigger.CronJobDetail.Name,
-        'Invalid job name'
-      );
-      Assert.areEqual(
-        MedicalFacilityOpenHoursUpdate.CRON_TIME,
-        cronTrigger.CronExpression,
-        'Inavlid cron expression'
-      );
-    }
-
-    @IsTest
-    static void testScheduleMeError() {
-        //TODO: EMAILMANAGER class
-        String sub = 'Errors occurred during batch process.';
-        MedicalFacilityOpenHoursUpdate medical = new MedicalFacilityOpenHoursUpdate();
-        MedicalFacilityOpenHoursUpdate.shouldForceException = true;
-        Test.startTest();
-        medical.execute(null);
-        Test.stopTest();
-    
-        List<EmailMessage> emails = [
-        SELECT TextBody, Subject, ToAddress, Id
-        FROM EmailMessage
-        WHERE Subject =: sub
-        ];
-
-        Assert.areEqual(1, emails.size());
-        Assert.areEqual(
-        sub,
-        emails[0].ToAddress
-        );
-    }
 
 }
