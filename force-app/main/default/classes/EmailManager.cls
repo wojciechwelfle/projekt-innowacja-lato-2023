@@ -25,11 +25,11 @@
 
         List<String> body = new List<String>();
         for (String statusCode : errorsMap.keySet()) {
-            body.add('Status Code: ' + statusCode + ', Facility IDs: ' + 'error: ' + errorsMap.get(statusCode));
+            body.add('Status Code: ' + statusCode + ', error: ' + String.join(errorsMap.get(statusCode), ', '));
         }
         Messaging.sendEmail(
           new Messaging.Email[] {EmailManager.createSingleEmail(
-              UserInfo.getUserEmail(), body.toString(), subject
+              UserInfo.getUserEmail(), String.join(body, '\n'), subject
             )}
         );
     }

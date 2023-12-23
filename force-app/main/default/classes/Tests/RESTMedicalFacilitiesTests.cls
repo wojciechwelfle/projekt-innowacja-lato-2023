@@ -83,8 +83,8 @@ public without sharing class RESTMedicalFacilitiesTests {
         List<Id> output = RESTMedicalFacilities.putMedicalFacilities();
         test.stopTest();
 
-        System.assertEquals('{"error": "No content to map to Object due to end of input"}', response.responseBody.toString());
-        System.assertEquals(400, response.statusCode);
+        Assert.areEqual('{"error": "No content to map to Object due to end of input"}', response.responseBody.toString());
+        Assert.areEqual(400, response.statusCode);
     }
 
     @isTest
