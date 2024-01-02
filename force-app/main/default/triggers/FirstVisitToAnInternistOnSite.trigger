@@ -1,13 +1,14 @@
 trigger FirstVisitToAnInternistOnSite on Medical_Appointment__c(before insert) {
   Map<Id, Medical_Appointment__c> appointments = new Map<Id, Medical_Appointment__c>();
   List<Id> patientsId = new List<Id>();
+
+  Id recType = Schema.getGlobalDescribe()
+    .get('Medical_Appointment__c')
+    .getDescribe()
+    .getRecordTypeInfosByName()
+    .get('Online')
+    .getRecordTypeId();
   for (Medical_Appointment__c appointment : Trigger.new) {
-    Id recType = Schema.getGlobalDescribe()
-      .get('Medical_Appointment__c')
-      .getDescribe()
-      .getRecordTypeInfosByName()
-      .get('Online')
-      .getRecordTypeId();
     if (appointment.RecordTypeId == recType) {
       appointments.put(appointment.id, appointment);
       patientsId.add(appointment.Patient__c);
