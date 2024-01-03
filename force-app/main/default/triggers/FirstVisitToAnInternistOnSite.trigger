@@ -15,31 +15,20 @@ trigger FirstVisitToAnInternistOnSite on Medical_Appointment__c(before insert) {
     }
   }
 
-  List<Id> doctorIds = new List<Id>();
-  List<Person__c> doctors = [
-    SELECT Id
-    FROM Person__c
-    WHERE Specialization__c = 'Internist'
-  ];
-  for (Person__c doctor : doctors) {
-    doctorIds.add(doctor.Id);
-  }
-
   List<Id> appIds = new List<Id>();
   List<Medical_Appointment__c> apps = [
     SELECT Patient__c
     FROM Medical_Appointment__c
-    WHERE Doctor__c IN :doctorIds AND Patient__c IN :patientsId
+    WHERE
+      Doctor__r.Specialization__c = 'Internist'
+      AND Patient__c IN :patientsId
   ];
   for (Medical_Appointment__c app : apps) {
-    appIds.add(app.Patient__c);
+    appIds.add(app.Id);
   }
 
   for (Medical_Appointment__c appointment : appointments.values()) {
-    if (
-      !appIds.contains(appointment.Patient__c) &&
-      doctorIds.contains(appointment.Doctor__c)
-    ) {
+    if (!appIds.contains(appointment.Patient__c)) {
       appointment.addError('First Visit in internist must be onsite!');
     }
   }
