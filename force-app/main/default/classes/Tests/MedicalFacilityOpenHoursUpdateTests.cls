@@ -55,6 +55,7 @@ private class MedicalFacilityOpenHoursUpdateTests {
         Test.startTest();
 
         MedicalFacilityOpenHoursUpdate schedulableInstance = new MedicalFacilityOpenHoursUpdate();
+        //
         schedulableInstance.execute(null);
 
         Test.stopTest();
