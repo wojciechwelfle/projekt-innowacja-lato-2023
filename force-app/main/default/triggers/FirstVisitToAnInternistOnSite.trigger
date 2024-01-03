@@ -1,6 +1,4 @@
 trigger FirstVisitToAnInternistOnSite on Medical_Appointment__c(before insert) {
-  List<Medical_Appointment__c> appointments = new List<Medical_Appointment__c>();
-  List<Id> patients = new List<Id>();
   Id recType = Medical_Appointment__c.getSObjectType()
     .getDescribe()
     .getRecordTypeInfosByName()
@@ -17,6 +15,8 @@ trigger FirstVisitToAnInternistOnSite on Medical_Appointment__c(before insert) {
     internistsIds.add(internist.Id);
   }
 
+  List<Medical_Appointment__c> appointments = new List<Medical_Appointment__c>();
+  List<Id> patients = new List<Id>();
   for (Medical_Appointment__c appointment : Trigger.new) {
     if (
       appointment.RecordTypeId == recType &&
