@@ -29,7 +29,7 @@ trigger FirstVisitToAnInternistOnSite on Medical_Appointment__c(before insert) {
 
   List<Id> patientsIds = new List<Id>();
   List<Medical_Appointment__c> appointmentsWithInternists = [
-    SELECT Id
+    SELECT Id, Patient__c
     FROM Medical_Appointment__c
     WHERE Doctor__c = :internistsIds AND Patient__c = :patients
   ];
