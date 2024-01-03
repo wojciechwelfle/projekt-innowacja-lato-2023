@@ -127,6 +127,7 @@ global with sharing class RESTMedicalFacilities {
 
             String criteria = RESTMedicalFacilities.createCriterias(daysOfWeek, fromDateTime, toDateTime);
             List<Medical_Facility__c> result;
+            //zmienic na isblank
             if(criteria != '') {
                 query += criteria;
                 result = Database.query(query);
