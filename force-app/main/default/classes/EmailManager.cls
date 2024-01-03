@@ -1,4 +1,4 @@
- public with sharing class EmailManager {
+public with sharing class EmailManager {
   
     public static Messaging.SingleEmailMessage createSingleEmail(
       String emailAddress,
