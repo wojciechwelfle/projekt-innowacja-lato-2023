@@ -1,12 +1,24 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Profile xmlns="http://soap.sforce.com/2006/04/metadata">
     <applicationVisibilities>
         <application>Health_Care_App</application>
-        <default>false</default>
+        <default>true</default>
         <visible>true</visible>
     </applicationVisibilities>
     <classAccesses>
+        <apexClass>EmailManager</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>EmailManagerTests</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>MedicalFacilityOpenHoursUpdate</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>MedicalFacilityOpenHoursUpdateTests</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -21,16 +33,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Medical_Appointment__c.Appointment_Id__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Medical_Facility__c.Adress__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Medical_Facility__c.Opening_Hours__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -54,14 +56,14 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>true</editable>
+        <editable>false</editable>
         <field>Person__c.Specialization__c</field>
-        <readable>true</readable>
+        <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>false</editable>
+        <editable>true</editable>
         <field>Prescription__c.Doctor__c</field>
-        <readable>false</readable>
+        <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
@@ -86,15 +88,15 @@
         <layout>Medical_Insurence__c-Medical Insurence Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
-        <layout>Person__c-Doctor Layout</layout>
-        <recordType>Person__c.Doctor</recordType>
-    </layoutAssignments>
-    <layoutAssignments>
-        <layout>Person__c-Patient Layout</layout>
-        <recordType>Person__c.Patient</recordType>
+        <layout>Person__c-Person Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
         <layout>Person__c-Person Layout</layout>
+        <recordType>Person__c.Doctor</recordType>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>Person__c-Person Layout</layout>
+        <recordType>Person__c.Patient</recordType>
     </layoutAssignments>
     <layoutAssignments>
         <layout>Prescription__c-Prescription Layout</layout>
@@ -182,7 +184,7 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>Prescription__c</tab>
-        <visibility>DefaultOn</visibility>
+        <visibility>Hidden</visibility>
     </tabVisibilities>
     <userLicense>Salesforce</userLicense>
     <userPermissions>
