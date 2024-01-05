@@ -31,7 +31,7 @@ trigger FirstVisitToAnInternistOnSite on Medical_Appointment__c(before insert) {
   List<Medical_Appointment__c> appointmentsWithInternists = [
     SELECT Id, Patient__c
     FROM Medical_Appointment__c
-    WHERE Doctor__c = :internistsIds AND Patient__c = :patients
+    WHERE Doctor__r.Specialization__c = 'Internist' AND Patient__c IN :patients
   ];
   for (Medical_Appointment__c appointment : appointmentsWithInternists) {
     patientsIds.add(appointment.Patient__c);
