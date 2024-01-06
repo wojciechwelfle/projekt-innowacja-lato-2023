@@ -5,16 +5,20 @@ public without sharing class RESTMedicalFacilitiesTests {
     private static void setupTestData() {
         Medical_Facility__c facility1 = new Medical_Facility__c(
             Name = 'Szpital dzieciecy', Phone_Number__c = '',
-            Monday__c = '09:00-17:00', Tuesday__c = '09:30-18:00', Wednesday__c = '10:00-19:00', 
-            Thursday__c = '08:00-16:30', Friday__c = '11:00-20:00', Saturday__c = '12:00-21:00', Sunday__c = '10:30-18:30',
+            Monday_Open_Hours__c = Time.newInstance(9,0,0,0), Tuesday_Open_Hours__c = Time.newInstance(9,30,0,0), Wednesday_Open_Hours__c = Time.newInstance(10,0,0,0), Thursday_Open_Hours__c = Time.newInstance(8,0,0,0), 
+            Friday_Open_Hours__c = Time.newInstance(11,0,0,0), Saturday_Open_Hours__c = Time.newInstance(12,0,0,0), Sunday_Open_Hours__c = Time.newInstance(10,30,0,0),
+            Monday_Close_Hours__c = Time.newInstance(17,0,0,0), Tuesday_Close_Hours__c = Time.newInstance(18,0,0,0), Wednesday_Close_Hours__c = Time.newInstance(19,0,0,0), Thursday_Close_Hours__c = Time.newInstance(16,30,0,0),
+            Friday_Close_Hours__c = Time.newInstance(20,0,0,0), Saturday_Close_Hours__c = Time.newInstance(21,0,0,0), Sunday_Close_Hours__c = Time.newInstance(18,30,0,0),
             City__c = 'ExampleCity', Street__c = 'Main Street', Building_number__c = '123', zip_code__c = '12-345'
         );
         insert facility1;
 
         Medical_Facility__c facility2 = new Medical_Facility__c(
             Name = 'Izba pomocy', Phone_Number__c = '',
-            Monday__c = '09:32-13:30', Tuesday__c = '06:30-18:00', Wednesday__c = '16:00-19:00', 
-            Thursday__c = '06:00-16:30', Friday__c = '15:00-20:00', Saturday__c = '12:00-21:00', Sunday__c = '10:30-18:30',
+            Monday_Open_Hours__c = Time.newInstance(9,32,0,0), Tuesday_Open_Hours__c = Time.newInstance(6,30,0,0), Wednesday_Open_Hours__c = Time.newInstance(16,0,0,0), Thursday_Open_Hours__c = Time.newInstance(6,0,0,0), 
+            Friday_Open_Hours__c = Time.newInstance(15,0,0,0), Saturday_Open_Hours__c = Time.newInstance(12,0,0,0), Sunday_Open_Hours__c = Time.newInstance(10,30,0,0),
+            Monday_Close_Hours__c = Time.newInstance(13,30,0,0), Tuesday_Close_Hours__c = Time.newInstance(18,0,0,0), Wednesday_Close_Hours__c = Time.newInstance(19,0,0,0), Thursday_Close_Hours__c = Time.newInstance(16,30,0,0),
+            Friday_Close_Hours__c = Time.newInstance(20,0,0,0), Saturday_Close_Hours__c = Time.newInstance(21,0,0,0), Sunday_Close_Hours__c = Time.newInstance(18,30,0,0),
             City__c = 'asdf', Street__c = 'erqw Street', Building_number__c = '321', zip_code__c = '23-385'
         );
         insert facility2;
@@ -79,8 +83,8 @@ public without sharing class RESTMedicalFacilitiesTests {
         List<Id> output = RESTMedicalFacilities.putMedicalFacilities();
         test.stopTest();
 
-        System.assertEquals('{"error": "No content to map to Object due to end of input"}', response.responseBody.toString());
-        System.assertEquals(400, response.statusCode);
+        Assert.areEqual('{"error": "No content to map to Object due to end of input"}', response.responseBody.toString());
+        Assert.areEqual(400, response.statusCode);
     }
 
     @isTest
@@ -107,7 +111,7 @@ public without sharing class RESTMedicalFacilitiesTests {
         List<Id> output = RESTMedicalFacilities.putMedicalFacilities();
         test.stopTest();
 
-        Assert.areEqual(output, idsList);
+        Assert.areEqual(idsList, output);
     }
 
     @isTest
@@ -126,7 +130,7 @@ public without sharing class RESTMedicalFacilitiesTests {
         RESTMedicalFacilities.postMedicalFacilities();
         test.stopTest();
 
-        Assert.areEqual(response.responseBody.toString(), '["Szpital dzieciecy","Izba pomocy"]');
+        Assert.areEqual('["Szpital dzieciecy","Izba pomocy"]', response.responseBody.toString());
     }
 
     @isTest
@@ -145,33 +149,29 @@ public without sharing class RESTMedicalFacilitiesTests {
         RESTMedicalFacilities.postMedicalFacilities();
         test.stopTest();
 
-        Assert.areEqual(response.responseBody.toString(), '["Szpital dzieciecy"]');
+        Assert.areEqual('["Szpital dzieciecy"]', response.responseBody.toString());
     }
 
     @isTest
-    private static void testSchedulableOpenHoursUpdate() {
-        List<Medical_Facility__c> facilities = [select Id, Name, Phone_Number__c,
-        Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c FROM Medical_Facility__c];
+    private static void testPostMethodError() {
+        RestRequest request = new RestRequest();
+        request.requestURI = 'services/apexrest/Medical_Facility__c';
+        RestResponse response = new RestResponse();
 
-        Test.startTest();
+        request.requestBody = Blob.valueOf('{"fromDateTime":"2023-12-06 10:00:","toDateTime":"2023-12-06 13:00:00"}');
 
-        MedicalFacilityOpenHoursUpdate schedulableInstance = new MedicalFacilityOpenHoursUpdate();
-        schedulableInstance.execute(null);
+        RestContext.request = request;
+        RestContext.response = response;
 
-        Test.stopTest();
-        
-        List<Medical_Facility__c> updatedFacilities = [select Id, Name, Phone_Number__c,
-        Monday__c, Tuesday__c, Wednesday__c, Thursday__c, Friday__c, Saturday__c, Sunday__c FROM Medical_Facility__c];
 
-        for (Integer i = 0; i<facilities.size();++i) {
-             Assert.arenotEqual(facilities[i].Monday__c, updatedFacilities[i].Monday__c);
-             Assert.arenotEqual(facilities[i].Tuesday__c, updatedFacilities[i].Tuesday__c);
-             Assert.arenotEqual(facilities[i].Wednesday__c, updatedFacilities[i].Wednesday__c);
-             Assert.arenotEqual(facilities[i].Thursday__c, updatedFacilities[i].Thursday__c);
-             Assert.arenotEqual(facilities[i].Friday__c, updatedFacilities[i].Friday__c);
-             Assert.arenotEqual(facilities[i].Saturday__c, updatedFacilities[i].Saturday__c);
-             Assert.arenotEqual(facilities[i].Sunday__c, updatedFacilities[i].Sunday__c);
-        }
+        test.startTest();
+        RESTMedicalFacilities.postMedicalFacilities();
+        test.stopTest();
+
+        Assert.areEqual('{"error": "Invalid date/time: 2023-12-06 10:00:"}', response.responseBody.toString());
+        Assert.areEqual(403, response.statusCode);
     }
+
+
 
 }

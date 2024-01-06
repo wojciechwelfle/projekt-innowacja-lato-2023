@@ -6,7 +6,7 @@
     <lookupFilter>
         <active>true</active>
         <filterItems>
-            <field>Person__c.RecordType.DeveloperName</field>
+            <field>Person__c.RecordType.Name</field>
             <operation>equals</operation>
             <value>&quot;Patient&quot;</value>
         </filterItems>
@@ -15,7 +15,7 @@
     <referenceTo>Person__c</referenceTo>
     <relationshipLabel>Medical Appointments (Patient)</relationshipLabel>
     <relationshipName>Medical_Appointment</relationshipName>
-    <relationshipOrder>0</relationshipOrder>
+    <relationshipOrder>1</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>
     <trackTrending>false</trackTrending>
     <type>MasterDetail</type>

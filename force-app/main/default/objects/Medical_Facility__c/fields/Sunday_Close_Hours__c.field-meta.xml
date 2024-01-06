@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Appointment_Id__c</fullName>
+    <fullName>Sunday_Close_Hours__c</fullName>
     <externalId>false</externalId>
-    <label>Appointment Id</label>
+    <label>Sunday Close Hours</label>
+    <required>true</required>
     <trackTrending>false</trackTrending>
-    <type>AutoNumber</type>
+    <type>Time</type>
 </CustomField>

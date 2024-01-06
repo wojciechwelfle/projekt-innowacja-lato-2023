@@ -28,31 +28,59 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Monday__c</field>
+                <field>Monday_Open_Hours__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Tuesday__c</field>
+                <field>Monday_Close_Hours__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Wednesday__c</field>
+                <field>Tuesday_Open_Hours__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Thursday__c</field>
+                <field>Tuesday_Close_Hours__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Friday__c</field>
+                <field>Wednesday_Open_Hours__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Saturday__c</field>
+                <field>Wednesday_Close_Hours__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Sunday__c</field>
+                <field>Thursday_Open_Hours__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Thursday_Close_Hours__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Friday_Open_Hours__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Friday_Close_Hours__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Saturday_Open_Hours__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Saturday_Close_Hours__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Sunday_Open_Hours__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Sunday_Close_Hours__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
