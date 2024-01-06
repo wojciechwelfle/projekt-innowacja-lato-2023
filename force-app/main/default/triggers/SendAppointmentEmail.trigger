@@ -4,6 +4,22 @@ trigger SendAppointmentEmail on Medical_Appointment__c(
 ) {
   Map<Id, List<Medical_Appointment__c>> patientAppointments = new Map<Id, List<Medical_Appointment__c>>();
   for (Medical_Appointment__c appointment : Trigger.new) {
+    if (Trigger.isUpdate) {
+      Medical_Appointment__c old = Trigger.oldMap.get(appointment.Id);
+      if (
+        old.Name == appointment.Name &&
+        old.Appointment_Date__c.format() ==
+        appointment.Appointment_Date__c.format() &&
+        old.Appointment_Status__c == appointment.Appointment_Status__c &&
+        old.Doctor__c == appointment.Doctor__c &&
+        old.Patient__c == appointment.Patient__c &&
+        old.recordTypeId == appointment.recordTypeId &&
+        old.Medical_Facility__c == appointment.Medical_Facility__c
+      ) {
+        continue;
+      }
+    }
+
     if (!patientAppointments.containsKey(appointment.Patient__c)) {
       patientAppointments.put(
         appointment.Patient__c,
