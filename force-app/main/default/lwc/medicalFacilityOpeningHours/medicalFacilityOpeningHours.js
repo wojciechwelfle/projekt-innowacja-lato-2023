@@ -1,39 +1,73 @@
 import { LightningElement, api, wire } from "lwc";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 
-import MONDAY from "@salesforce/schema/Medical_Facility__c.Monday__c";
-import TUESDAY from "@salesforce/schema/Medical_Facility__c.Tuesday__c";
-import WEDNESDAY from "@salesforce/schema/Medical_Facility__c.Wednesday__c";
-import THURSDAY from "@salesforce/schema/Medical_Facility__c.Thursday__c";
-import FRIDAY from "@salesforce/schema/Medical_Facility__c.Friday__c";
-import SATURDAY from "@salesforce/schema/Medical_Facility__c.Saturday__c";
-import SUNDAY from "@salesforce/schema/Medical_Facility__c.Sunday__c";
+import MONDAY_OPEN from "@salesforce/schema/Medical_Facility__c.Monday_Open_Hours__c";
+import MONDAY_CLOSE from "@salesforce/schema/Medical_Facility__c.Monday_Close_Hours__c";
+import TUESDAY_OPEN from "@salesforce/schema/Medical_Facility__c.Tuesday_Open_Hours__c";
+import TUESDAY_CLOSE from "@salesforce/schema/Medical_Facility__c.Tuesday_Close_Hours__c";
+import WEDNESDAY_OPEN from "@salesforce/schema/Medical_Facility__c.Wednesday_Open_Hours__c";
+import WEDNESDAY_CLOSE from "@salesforce/schema/Medical_Facility__c.Wednesday_Close_Hours__c";
+import THURSDAY_OPEN from "@salesforce/schema/Medical_Facility__c.Thursday_Open_Hours__c";
+import THURSDAY_CLOSE from "@salesforce/schema/Medical_Facility__c.Thursday_Close_Hours__c";
+import FRIDAY_OPEN from "@salesforce/schema/Medical_Facility__c.Friday_Open_Hours__c";
+import FRIDAY_CLOSE from "@salesforce/schema/Medical_Facility__c.Friday_Close_Hours__c";
+import SATURDAY_OPEN from "@salesforce/schema/Medical_Facility__c.Saturday_Open_Hours__c";
+import SATURDAY_CLOSE from "@salesforce/schema/Medical_Facility__c.Saturday_Close_Hours__c";
+import SUNDAY_OPEN from "@salesforce/schema/Medical_Facility__c.Sunday_Open_Hours__c";
+import SUNDAY_CLOSE from "@salesforce/schema/Medical_Facility__c.Sunday_Close_Hours__c";
 
-const FIELDS = [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY];
+const FIELDS = [
+  MONDAY_OPEN,
+  MONDAY_CLOSE,
+  TUESDAY_OPEN,
+  TUESDAY_CLOSE,
+  WEDNESDAY_OPEN,
+  WEDNESDAY_CLOSE,
+  THURSDAY_OPEN,
+  THURSDAY_CLOSE,
+  FRIDAY_OPEN,
+  FRIDAY_CLOSE,
+  SATURDAY_OPEN,
+  SATURDAY_CLOSE,
+  SUNDAY_OPEN,
+  SUNDAY_CLOSE
+];
 
 export default class MedicalFacilityOpeningHours extends LightningElement {
   @api recordId;
   @wire(getRecord, { recordId: "$recordId", fields: FIELDS }) facility;
 
+  parseTime(time) {
+    return time.substring(0, 5);
+  }
+
+  createTime(open, close) {
+    return (
+      this.parseTime(getFieldValue(this.facility.data, open)) +
+      "-" +
+      this.parseTime(getFieldValue(this.facility.data, close))
+    );
+  }
+
   get monday() {
-    return getFieldValue(this.facility.data, MONDAY);
+    return this.createTime(MONDAY_OPEN, MONDAY_CLOSE);
   }
   get tuesday() {
-    return getFieldValue(this.facility.data, TUESDAY);
+    return this.createTime(TUESDAY_OPEN, TUESDAY_CLOSE);
   }
   get wednesday() {
-    return getFieldValue(this.facility.data, WEDNESDAY);
+    return this.createTime(WEDNESDAY_OPEN, WEDNESDAY_CLOSE);
   }
   get thursday() {
-    return getFieldValue(this.facility.data, THURSDAY);
+    return this.createTime(THURSDAY_OPEN, THURSDAY_CLOSE);
   }
   get friday() {
-    return getFieldValue(this.facility.data, FRIDAY);
+    return this.createTime(FRIDAY_OPEN, FRIDAY_CLOSE);
   }
   get saturday() {
-    return getFieldValue(this.facility.data, SATURDAY);
+    return this.createTime(SATURDAY_OPEN, SATURDAY_CLOSE);
   }
   get sunday() {
-    return getFieldValue(this.facility.data, SUNDAY);
+    return this.createTime(SUNDAY_OPEN, SUNDAY_CLOSE);
   }
 }
