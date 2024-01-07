@@ -4,6 +4,7 @@
     <label>RESTApp</label>
     <oauthConfig>
         <callbackUrl>https://cw-inn--inta.sandbox.my.salesforce.com/services/apexrest/Medical_Facility__c</callbackUrl>
+        <consumerKey>3MVG9Lu3LaaTCEgJrugg6aJM2eMlhH2mOceKfYYeX6mtw67QjkH4qzKLQ.d4aRcE416GzNaYeVyWHFqTwELmj</consumerKey>
         <isAdminApproved>false</isAdminApproved>
         <isClientCredentialEnabled>true</isClientCredentialEnabled>
         <isCodeCredentialEnabled>false</isCodeCredentialEnabled>
