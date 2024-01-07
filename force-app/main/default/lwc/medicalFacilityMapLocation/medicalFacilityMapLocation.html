@@ -1,0 +1,12 @@
+<template>
+  <template lwc:if={facility.data}>
+    <lightning-map
+      map-markers={mapMarkers}
+      zoom-level={zoomLevel}
+      options={mapOptions}
+      list-view={listView}
+      show-footer
+    >
+    </lightning-map>
+  </template>
+</template>
