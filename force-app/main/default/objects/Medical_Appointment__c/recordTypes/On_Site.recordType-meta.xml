@@ -3,4 +3,19 @@
     <fullName>On_Site</fullName>
     <active>true</active>
     <label>On Site</label>
+    <picklistValues>
+        <picklist>Appointment_Status__c</picklist>
+        <values>
+            <fullName>Cancelled</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Made</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Upcoming</fullName>
+            <default>true</default>
+        </values>
+    </picklistValues>
 </RecordType>
