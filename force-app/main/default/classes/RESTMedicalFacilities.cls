@@ -127,20 +127,25 @@ global with sharing class RESTMedicalFacilities {
 
             String criteria = RESTMedicalFacilities.createCriterias(daysOfWeek, fromDateTime, toDateTime);
             List<Medical_Facility__c> result;
-            //zmienic na isblank
-            if(criteria != '') {
-                query += criteria;
-                result = Database.query(query);
-            }
-
-            List<String> resultName = new List<String>();
-            for (Medical_Facility__c fac : result) {
-                resultName.add(fac.Name);
-            }
-
             RestResponse res = RestContext.response;
             res.statusCode = 200;
-            res.responseBody = Blob.valueOf(JSON.serialize(resultName));
+
+            if(String.isBlank(criteria)) {
+                res.responseBody = Blob.valueOf(JSON.serialize(''));
+            } else {
+                query += criteria;
+                result = Database.query(query);
+
+                List<String> resultName = new List<String>();
+                for (Medical_Facility__c fac : result) {
+                    resultName.add(fac.Name);
+                }
+
+                
+                res.responseBody = Blob.valueOf(JSON.serialize(resultName));
+            }
+
+            
         } catch (JSONException e) {
             RestContext.response.responseBody = Blob.valueOf('{"error": "' + e.getMessage() + '"}');
             RestContext.response.statusCode = 400;
