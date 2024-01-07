@@ -48,10 +48,12 @@ export default class LightningMapExample extends LightningElement {
     }
     return [];
   }
+
   mapOptions = {
     draggable: true,
     disableDefaultUI: false
   };
+
   zoomLevel = 17;
   listView = "visible";
 }
