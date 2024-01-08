@@ -60,7 +60,6 @@ trigger SendAppointmentEmail on Medical_Appointment__c(
       String formatted = String.format(template, parameters);
 
       mail.setPlainTextBody(formatted);
-
       emailsToSend.add(mail);
     }
   }
