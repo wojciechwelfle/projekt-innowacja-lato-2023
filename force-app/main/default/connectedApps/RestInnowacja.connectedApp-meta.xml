@@ -6,18 +6,13 @@
         <callbackUrl>https://www.getpostman.com/oauth2/callback</callbackUrl>
         <consumerKey>3MVG9Lu3LaaTCEgJ1gvddPIi1T5utERHWaDc6X7KsGl4WyYla265OOHwHod.ZQbfj62uw56a.QdS1iYC6TdV6</consumerKey>
         <isAdminApproved>false</isAdminApproved>
-        <isClientCredentialEnabled>false</isClientCredentialEnabled>
-        <isCodeCredentialEnabled>false</isCodeCredentialEnabled>
-        <isCodeCredentialPostOnly>false</isCodeCredentialPostOnly>
         <isConsumerSecretOptional>false</isConsumerSecretOptional>
         <isIntrospectAllTokens>false</isIntrospectAllTokens>
-        <isNamedUserJwtEnabled>false</isNamedUserJwtEnabled>
-        <isSecretRequiredForRefreshToken>false</isSecretRequiredForRefreshToken>
         <scopes>Api</scopes>
         <scopes>Full</scopes>
     </oauthConfig>
     <oauthPolicy>
         <ipRelaxation>ENFORCE</ipRelaxation>
-        <refreshTokenPolicy>infinite</refreshTokenPolicy>
+        <refreshTokenPolicy>zero</refreshTokenPolicy>
     </oauthPolicy>
 </ConnectedApp>
