@@ -27,7 +27,7 @@
                 <field>Building_number__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Required</behavior>
+                <behavior>Edit</behavior>
                 <field>Country__c</field>
             </layoutItems>
             <layoutItems>
