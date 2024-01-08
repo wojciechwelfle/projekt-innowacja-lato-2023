@@ -1,0 +1,15 @@
+<template>
+  <lightning-card class="title" title="Medical Facility Opening Hours">
+    <template lwc:if={facility.data}>
+      <div class="week-days">
+        <div>Monday: {monday}</div>
+        <div>Tuesday: {tuesday}</div>
+        <div>Wednesday: {wednesday}</div>
+        <div>Thursday: {thursday}</div>
+        <div>Friday: {friday}</div>
+        <div>Saturday: {saturday}</div>
+        <div>Sunday: {sunday}</div>
+      </div>
+    </template>
+  </lightning-card>
+</template>
