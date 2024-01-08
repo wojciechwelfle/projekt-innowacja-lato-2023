@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Building_number__c</fullName>
-    <description>building number</description>
+    <fullName>Country__c</fullName>
+    <defaultValue>&quot;Poland&quot;</defaultValue>
     <externalId>false</externalId>
-    <label>Building number</label>
-    <length>10</length>
-    <required>true</required>
+    <label>Country</label>
+    <length>56</length>
+    <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Text</type>
     <unique>false</unique>
