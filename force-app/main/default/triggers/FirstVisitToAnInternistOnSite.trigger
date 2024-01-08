@@ -42,4 +42,5 @@ trigger FirstVisitToAnInternistOnSite on Medical_Appointment__c(before insert) {
       appointment.addError('First visit in Internist must be On Site');
     }
   }
+
 }
