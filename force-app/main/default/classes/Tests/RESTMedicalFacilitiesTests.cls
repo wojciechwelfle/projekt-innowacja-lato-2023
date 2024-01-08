@@ -172,6 +172,26 @@ public without sharing class RESTMedicalFacilitiesTests {
         Assert.areEqual(403, response.statusCode);
     }
 
+    @isTest
+    private static void testPostEmptyMessage() {
+        RestRequest request = new RestRequest();
+        request.requestURI = 'services/apexrest/Medical_Facility__c';
+        RestResponse response = new RestResponse();
+
+        request.requestBody = Blob.valueOf('{"fromDateTime":"2023-12-07 20:00:00","toDateTime":"2023-12-07 21:00:00"}');
+
+        RestContext.request = request;
+        RestContext.response = response;
+
+
+        test.startTest();
+        RESTMedicalFacilities.postMedicalFacilities();
+        test.stopTest();
+
+        Assert.areEqual('[]', response.responseBody.toString());
+        Assert.areEqual(200, response.statusCode);
+    }
+
 
 
 }
