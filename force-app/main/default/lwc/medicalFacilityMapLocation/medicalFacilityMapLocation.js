@@ -24,6 +24,7 @@ export default class LightningMapExample extends LightningElement {
       this.getFacilityField(BUILDING_NUMBER)
     );
   }
+
   get mapMarkers() {
     if (this.facility.data) {
       const city = this.getFacilityField(CITY);
