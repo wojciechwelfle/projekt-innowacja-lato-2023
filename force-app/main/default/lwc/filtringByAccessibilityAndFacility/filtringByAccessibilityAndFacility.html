@@ -1,0 +1,13 @@
+<template>
+    <lightning-card title="Wybierz lekarza">
+        <div class="slds-m-around_medium">
+            <lightning-combobox
+                name="doctorSelection"
+                label="Wybierz lekarza"
+                value={selectedDoctorId}
+                options={doctorOptions}
+                onchange={handleDoctorChange}>
+            </lightning-combobox>
+        </div>
+    </lightning-card>
+</template>
