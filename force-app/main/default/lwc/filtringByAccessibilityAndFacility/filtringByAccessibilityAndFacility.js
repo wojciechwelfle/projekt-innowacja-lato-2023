@@ -36,15 +36,15 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     @wire(getSpecialization, { facilityId: "$selectedFacilityId" })
     wiredSpecialization({ error, data }) {
         if (data) {
-            let labels = data.map(specialization => specialization.Specialization__c);
-            this.specializations = data.filter((specialization, index) => labels.indexOf(specialization.Specialization__c) === index).map(specialization => ({
-                label: specialization.Specialization__c,
-                value: specialization.Specialization__c
-            }));
-            // this.specializations = data.map(specialization => ({
+            // let labels = data.map(specialization => specialization.Specialization__c);
+            // this.specializations = data.filter((specialization, index) => labels.indexOf(specialization.Specialization__c) === index).map(specialization => ({
             //     label: specialization.Specialization__c,
             //     value: specialization.Specialization__c
             // }));
+            this.specializations = data.map(specialization => ({
+                label: specialization.Specialization__c,
+                value: specialization.Specialization__c
+            }));
         } else if (error) {
             console.error('Błąd pobierania specjalizacji', error);
         }

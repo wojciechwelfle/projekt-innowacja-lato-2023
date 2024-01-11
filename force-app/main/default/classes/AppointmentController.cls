@@ -10,13 +10,14 @@ public with sharing class AppointmentController {
     }
 
     @AuraEnabled(cacheable = true)
-    public static List<Person__c> getAllSpecializationsFromDoctorsWorkingInAFacility(String facilityId) {
+    public static List<AggregateResult> getAllSpecializationsFromDoctorsWorkingInAFacility(String facilityId) {
         return 
             [
                 select Specialization__c from Person__c 
                 where RecordType.Name = 'Doctor'
                 and Medical_Facility__c =: facilityId
                 with SECURITY_ENFORCED
+                group by Specialization__c
             ];
     }
 
