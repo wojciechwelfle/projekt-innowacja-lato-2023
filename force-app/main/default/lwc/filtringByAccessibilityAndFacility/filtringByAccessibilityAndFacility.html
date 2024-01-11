@@ -1,13 +1,66 @@
 <template>
-    <lightning-card title="Wybierz lekarza">
+    <lightning-card title="Book an appointment">
+
+        <div class="slds-m-around_medium">
+            <lightning-combobox
+                name="facilitySelection"
+                label="Choose facility"
+                value={selectedFacilityId}
+                options={facilitisOptions}
+                onchange={handleFacilityChange}>
+            </lightning-combobox>
+        </div>
+
+        <div class="slds-m-around_medium">
+            <lightning-combobox
+                name="specializationSelection"
+                label="Choose specialization"
+                value={selectedSpecializationId}
+                options={specializationOptions}
+                onchange={handleSpecializationChange}
+                disabled={isSpecializationDisabled}>
+            </lightning-combobox>
+        </div>
+
         <div class="slds-m-around_medium">
             <lightning-combobox
                 name="doctorSelection"
                 label="Wybierz lekarza"
                 value={selectedDoctorId}
                 options={doctorOptions}
-                onchange={handleDoctorChange}>
+                onchange={handleDoctorChange}
+                disabled={isDoctorDisabled}>
             </lightning-combobox>
         </div>
+
+        <div class="slds-m-around_medium">
+            <lightning-input
+                type="datetime-local"
+                label="Select date and time"
+                value={selectedDateTime}
+                onchange={handleDateTimeChange}>
+            </lightning-input>
+        </div>
+
+        <div class="slds-m-around_medium">
+            <lightning-radio-group
+                name="picklistSelection"
+                label="Choose value from picklist"
+                options={picklistOptions}
+                value={selectedPicklistValue}
+                type="radio"
+                onchange={handlePicklistChange}>
+            </lightning-radio-group>
+        </div>
+
+        <div class="slds-m-around_medium">
+            <lightning-button
+                label="Book Appointment"
+                variant="brand"
+                onclick={handleAppointmentBooking}
+                disabled={isBookDisabled}>
+            </lightning-button>
+        </div>
+
     </lightning-card>
 </template>
