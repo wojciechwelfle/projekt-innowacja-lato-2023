@@ -8,7 +8,7 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     
     @track doctors = [];
     @track facilities = [];
-    // @track specializations = [];
+    @track specializations = [];
     picklistOptions = [
         { label: "Online", value: "online" },
         { label: "On-Site", value: "onSite" }
@@ -19,7 +19,6 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     @track selectedSpecializationId = null;
     @track selectedSpecializationLabel = null;
     @track selectedPicklistValue;
-    @track specializations;
 
 
     @wire(getFacilities)
@@ -34,23 +33,18 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
         }
     }
 
-    // @wire(getSpecialization, { facilityId: "$selectedFacilityId" })
-    // wiredSpecialization({ error, data }) {
-    //     if (data) {
-    //         this.specializations = data.map(specialization => ({
-    //             label: specialization.Specialization__c,
-    //             value: specialization.Id
-    //         }));
-    //     } else if (error) {
-    //         console.error('Błąd pobierania specjalizacji', error);
-    //     }
-    // }
-
     @wire(getSpecialization, { facilityId: "$selectedFacilityId" })
     wiredSpecialization({ error, data }) {
         if (data) {
-            this.specializations = Array.from(new Set(data.map(specialization => specialization.Specialization__c)));
-            console.log(this.specializations);
+            let labels = data.map(specialization => specialization.Specialization__c);
+            this.specializations = data.filter((specialization, index) => labels.indexOf(specialization.Specialization__c) === index).map(specialization => ({
+                label: specialization.Specialization__c,
+                value: specialization.Specialization__c
+            }));
+            // this.specializations = data.map(specialization => ({
+            //     label: specialization.Specialization__c,
+            //     value: specialization.Specialization__c
+            // }));
         } else if (error) {
             console.error('Błąd pobierania specjalizacji', error);
         }
@@ -77,8 +71,6 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
 
     handleSpecializationChange(event) {
         this.selectedSpecializationId = event.detail.value;
-        // this.selectedSpecializationLabel = ;
-        // console.log("label: " + this.specializations[this.selectedSpecializationId])
     }
 
     handleDoctorChange(event) {
