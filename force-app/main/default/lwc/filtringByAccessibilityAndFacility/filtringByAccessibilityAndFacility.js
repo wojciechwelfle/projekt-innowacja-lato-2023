@@ -36,11 +36,6 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     @wire(getSpecialization, { facilityId: "$selectedFacilityId" })
     wiredSpecialization({ error, data }) {
         if (data) {
-            // let labels = data.map(specialization => specialization.Specialization__c);
-            // this.specializations = data.filter((specialization, index) => labels.indexOf(specialization.Specialization__c) === index).map(specialization => ({
-            //     label: specialization.Specialization__c,
-            //     value: specialization.Specialization__c
-            // }));
             this.specializations = data.map(specialization => ({
                 label: specialization.Specialization__c,
                 value: specialization.Specialization__c
@@ -50,7 +45,7 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
         }
     }
     
-    @wire(getDoctors, { facilityId: "$selectedFacilityId", specialization: "$selectedSpecializationLabel" })
+    @wire(getDoctors, { facilityId: "$selectedFacilityId", specialization: "$selectedSpecializationId" })
     wiredDoctors({ error, data }) {
         if (data) {
             this.doctors = data.map(doctor => ({
@@ -99,7 +94,8 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
 
     get doctorOptions() {
         return this.doctors;
-    }
+        // return this.doctors.sort((a, b) => a.label.localeCompare(b.label));
+    }    
 
     get isSpecializationDisabled() {
         return !this.selectedFacilityId;

@@ -34,6 +34,8 @@ public with sharing class AppointmentController {
         );
     }
 
+    //TODO: saving appointment
+
     // @AuraEnabled
     // public static List<Person__c> saveAppointment(
     //         String facilityId, String doctorId, String patientId, boolean isOnline, String DateTimee
