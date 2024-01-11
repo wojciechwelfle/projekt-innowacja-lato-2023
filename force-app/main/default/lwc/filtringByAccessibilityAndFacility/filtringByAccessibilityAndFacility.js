@@ -3,9 +3,10 @@ import getDoctors from '@salesforce/apex/AppointmentController.getAllDoctorsWork
 import getSpecialization from '@salesforce/apex/AppointmentController.getAllSpecializationsFromDoctorsWorkingInAFacility';
 import getFacilities from '@salesforce/apex/AppointmentController.getAllFacilities';
 import bookAppointment from '@salesforce/apex/AppointmentController.saveAppointment';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class FiltringByAccessibilityAndFacility extends LightningElement {
-    @api patientId;
+    @api recordId;
     
     @track doctors = [];
     @track facilities = [];
@@ -82,16 +83,34 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     }
 
     handleAppointmentBooking() {
-        bookAppointment({facilityId: this.selectedFacilityId,
+        bookAppointment({
+            facilityId: this.selectedFacilityId,
             doctorId: this.selectedDoctorId,
-            patientId: this.patientId,
+            patientId: this.recordId,
             isOnline: this.selectedPicklistValue,
-            dateTimeString: this.dateTimeString})
-            .then(() => {
-                console.log('Tags Saved!');
+            dateTimeString: this.dateTimeString
+        }).then(() => {
+                this.selectedFacilityId = null
+                this.selectedDoctorId = null
+                this.selectedPicklistValue = null
+
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Appointment booked successfully!',
+                        variant: 'success'
+                    })
+                );
             })
             .catch(error => {
-                console.error(JSON.stringify(error));
+                const errorMessage = error.body.pageErrors[0].message
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error',
+                        message: errorMessage,
+                        variant: 'error'
+                    })
+                );
             })
     }
 

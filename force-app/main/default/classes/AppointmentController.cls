@@ -39,26 +39,60 @@ public with sharing class AppointmentController {
             String facilityId, String doctorId, String patientId, String isOnline, String dateTimeString
         ) {
         Id recordId = isOnline == 'Online' ? 
-        Medical_Appointment__c.getSObjectType()
-        .getDescribe()
-        .getRecordTypeInfosByName()
-        .get('Online')
-        .getRecordTypeId()
-        :
-        Medical_Appointment__c.getSObjectType()
-        .getDescribe()
-        .getRecordTypeInfosByName()
-        .get('On-Site')
-        .getRecordTypeId();
+        AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'Online')
+        : AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'On Site');
+        
+        AggregateResult name = [select count(Patient__c) from Medical_Appointment__c where Medical_Facility__c =: facilityId and Patient__c =: patientId];
+        System.debug('recordId: ' + recordId + ' doctor: ' + doctorId + ' patient: ' + patientId + ' isonline: ' + isOnline + ' date: ' + dateTimeString);
 
-        insert new Medical_Appointment__c(
-            Name='test visit', 
+        Medical_Appointment__c appointment = new Medical_Appointment__c(
+            Name=String.valueOf((Integer)name.get('expr0')) + ' visit', 
             Doctor__c=doctorId, 
             Medical_Facility__c=facilityId, 
             Patient__c=patientId, 
             Appointment_Status__c='Upcoming', 
-            Appointment_Date__c = DateTime.valueOf(dateTimeString),
+            Appointment_Date__c = DateTime.valueOf(dateTimeString.replace('T', ' ')),
             RecordTypeId = recordId
         );
+
+        insert appointment;
+    }
+    public static Id getRecordTypeIdbyName(String objectName, String strRecordTypeName){
+        return  Schema.getGlobalDescribe().get(objectName).getDescribe().getRecordTypeInfosByName().get(strRecordTypeName).getRecordTypeId();
     }
 }
+
+
+
+//     @AuraEnabled
+// public static void saveAppointment(
+//     String facilityId, String doctorId, String patientId, String isOnline, String dateTimeString
+// ) {
+//     String recordTypeName = (isOnline == 'Online') ? 'Online' : 'On-Site';
+
+//     Schema.DescribeSObjectResult describeResult = Medical_Appointment__c.sObjectType.getDescribe();
+//     System.debug(describeResult);
+//     Map<String, Schema.RecordTypeInfo> recordTypeInfosByName = describeResult.getRecordTypeInfosByName();
+
+//     if (recordTypeInfosByName != null && recordTypeInfosByName.containsKey(recordTypeName)) {
+//         Id recordId = recordTypeInfosByName.get(recordTypeName).getRecordTypeId();
+//         System.debug('recordId: ' + recordId + ' doctor: ' + doctorId + ' patient: ' + patientId + ' isonline: ' + isOnline + ' date: ' + dateTimeString);
+
+//         Medical_Appointment__c appointment = new Medical_Appointment__c(
+//             Name='test visit', 
+//             Doctor__c=doctorId, 
+//             Medical_Facility__c=facilityId, 
+//             Patient__c=patientId, 
+//             Appointment_Status__c='Upcoming', 
+//             Appointment_Date__c = DateTime.valueOf(dateTimeString.replace('T', ' ')),
+//             RecordTypeId = recordId
+//         );
+
+//         insert appointment;
+//     } else {
+//         // Handle the case where the record type info is not available
+//         System.debug('Record type info not found for: ' + recordTypeName);
+//     }
+// }
+
+// }
