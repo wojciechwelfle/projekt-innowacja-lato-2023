@@ -10,8 +10,8 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     @track facilities = [];
     @track specializations = [];
     picklistOptions = [
-        { label: "Online", value: "online" },
-        { label: "On-Site", value: "onSite" }
+        { label: "Online", value: "Online" },
+        { label: "On-Site", value: "On-Site" }
     ];
 
     @track selectedDoctorId;
