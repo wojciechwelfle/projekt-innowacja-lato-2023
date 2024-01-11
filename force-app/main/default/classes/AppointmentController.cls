@@ -34,20 +34,31 @@ public with sharing class AppointmentController {
         );
     }
 
-    //TODO: saving appointment
+    @AuraEnabled
+    public static void saveAppointment(
+            String facilityId, String doctorId, String patientId, String isOnline, String dateTimeString
+        ) {
+        Id recordId = isOnline == 'Online' ? 
+        Medical_Appointment__c.getSObjectType()
+        .getDescribe()
+        .getRecordTypeInfosByName()
+        .get('Online')
+        .getRecordTypeId()
+        :
+        Medical_Appointment__c.getSObjectType()
+        .getDescribe()
+        .getRecordTypeInfosByName()
+        .get('On-Site')
+        .getRecordTypeId();
 
-    // @AuraEnabled
-    // public static List<Person__c> saveAppointment(
-    //         String facilityId, String doctorId, String patientId, boolean isOnline, String DateTimee
-    //     ) {
-    //     return new List<Person__c>(
-    //         [
-    //             select Id, Name, Last_Name__c from Person__c 
-    //             where RecordType.Name = 'Doctor'
-    //             and Id in doctorId
-    //             with SECURITY_ENFORCED
-
-    //         ]
-    //     );
-    // }
+        insert new Medical_Appointment__c(
+            Name='test visit', 
+            Doctor__c=doctorId, 
+            Medical_Facility__c=facilityId, 
+            Patient__c=patientId, 
+            Appointment_Status__c='Upcoming', 
+            Appointment_Date__c = DateTime.valueOf(dateTimeString),
+            RecordTypeId = recordId
+        );
+    }
 }

@@ -2,6 +2,7 @@ import { api, LightningElement, wire, track } from 'lwc';
 import getDoctors from '@salesforce/apex/AppointmentController.getAllDoctorsWorkingInCurrentFacility';
 import getSpecialization from '@salesforce/apex/AppointmentController.getAllSpecializationsFromDoctorsWorkingInAFacility';
 import getFacilities from '@salesforce/apex/AppointmentController.getAllFacilities';
+import bookAppointment from '@salesforce/apex/AppointmentController.saveAppointment';
 
 export default class FiltringByAccessibilityAndFacility extends LightningElement {
     @api patientId;
@@ -49,7 +50,7 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     wiredDoctors({ error, data }) {
         if (data) {
             this.doctors = data.map(doctor => ({
-                label: doctor.Name + " " + doctor.Last_Name__c,
+                label: doctor.Last_Name__c + " " + doctor.Name,
                 value: doctor.Id
             }));
         } else if (error) {
@@ -77,11 +78,21 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     }
 
     handleDateTimeChange(event) {
-        this.selectedDateTime = event.target.value;
+        this.dateTimeString = event.target.value;
     }
 
     handleAppointmentBooking() {
-
+        bookAppointment({facilityId: this.selectedFacilityId,
+            doctorId: this.selectedDoctorId,
+            patientId: this.patientId,
+            isOnline: this.selectedPicklistValue,
+            dateTimeString: this.dateTimeString})
+            .then(() => {
+                console.log('Tags Saved!');
+            })
+            .catch(error => {
+                console.error(JSON.stringify(error));
+            })
     }
 
     get facilitisOptions() {
@@ -93,8 +104,7 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     }
 
     get doctorOptions() {
-        return this.doctors;
-        // return this.doctors.sort((a, b) => a.label.localeCompare(b.label));
+        return this.doctors.sort((a, b) => a.label.localeCompare(b.label));
     }    
 
     get isSpecializationDisabled() {
@@ -109,6 +119,6 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
         return  !this.selectedFacilityId ||
                 !this.selectedSpecializationId ||
                 !this.selectedDoctorId ||
-                !this.selectedDateTime;
+                !this.dateTimeString;
     }    
 }
