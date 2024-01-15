@@ -1,4 +1,5 @@
 import { api, LightningElement, wire, track } from 'lwc';
+import getPatients from '@salesforce/apex/AppointmentController.getAllPatients';
 import getDoctors from '@salesforce/apex/AppointmentController.getAllDoctorsWorkingInCurrentFacility';
 import getSpecialization from '@salesforce/apex/AppointmentController.getAllSpecializationsFromDoctorsWorkingInAFacility';
 import getFacilities from '@salesforce/apex/AppointmentController.getAllFacilities';
@@ -7,7 +8,8 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class FiltringByAccessibilityAndFacility extends LightningElement {
     @api recordId;
-    
+
+    @track patients = [];
     @track doctors = [];
     @track facilities = [];
     @track specializations = [];
@@ -17,11 +19,24 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     ];
 
     @track selectedDoctorId;
+    @track patientId = null;
     @track selectedFacilityId = null;
     @track selectedSpecializationId = null;
     @track selectedSpecializationLabel = null;
     @track selectedPicklistValue;
 
+
+    @wire(getPatients)
+    wiredPatients({ error, data }) {
+        if (data) {
+            this.patients = data.map(patient => ({
+                label: patient.Name,
+                value: patient.Id
+            }));
+        } else if (error) {
+            console.error('Błąd pobierania danych o pacjentach', error);
+        }
+    }
 
     @wire(getFacilities)
     wiredFacilities({ error, data }) {
@@ -59,6 +74,15 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
         }
     }
 
+    handlePatientChange(event) {
+        console.log('recordID: ' + this.recordId)
+        this.patientId = event.detail.value;
+        this.selectedFacilityId = null;
+        this.selectedSpecializationId = null;
+        this.selectedDoctorId = null;
+        this.doctors = [];
+    }
+
     handleFacilityChange(event) {
         this.selectedFacilityId = event.detail.value;
         this.selectedSpecializationId = null;
@@ -75,6 +99,7 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     }
 
     handlePicklistChange(event) {
+        console.log('pacjetn: ' + this.patientId)
         this.selectedPicklistValue = event.detail.value;
     }
 
@@ -86,7 +111,7 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
         bookAppointment({
             facilityId: this.selectedFacilityId,
             doctorId: this.selectedDoctorId,
-            patientId: this.recordId,
+            patientId: this.patientId,
             isOnline: this.selectedPicklistValue,
             dateTimeString: this.dateTimeString
         }).then(() => {
@@ -114,7 +139,7 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
             })
     }
 
-    get facilitisOptions() {
+    get facilitiesOptions() {
         return this.facilities;
     }
 
@@ -134,10 +159,15 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
         return !this.selectedSpecializationId || !this.selectedFacilityId;
     }
 
+    get patientsOptions() {
+        return this.patients;
+    }
+
     get isBookDisabled() {
         return  !this.selectedFacilityId ||
                 !this.selectedSpecializationId ||
                 !this.selectedDoctorId ||
-                !this.dateTimeString;
+                !this.dateTimeString ||
+                !this.patientId;
     }    
 }

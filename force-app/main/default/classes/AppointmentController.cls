@@ -1,4 +1,14 @@
 public with sharing class AppointmentController {
+
+    @AuraEnabled(cacheable = true)
+    public static List<Person__c> getAllPatients() {
+        return 
+            [
+                select Id, Name from Person__c
+                where RecordType.Name = 'Patient'
+                with SECURITY_ENFORCED
+            ];
+    }
     
     @AuraEnabled(cacheable = true)
     public static List<Medical_Facility__c> getAllFacilities() {
@@ -43,7 +53,6 @@ public with sharing class AppointmentController {
         : AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'On Site');
         
         AggregateResult name = [select count(Patient__c) from Medical_Appointment__c where Medical_Facility__c =: facilityId and Patient__c =: patientId];
-        System.debug('recordId: ' + recordId + ' doctor: ' + doctorId + ' patient: ' + patientId + ' isonline: ' + isOnline + ' date: ' + dateTimeString);
 
         Medical_Appointment__c appointment = new Medical_Appointment__c(
             Name=String.valueOf((Integer)name.get('expr0')) + ' visit', 
