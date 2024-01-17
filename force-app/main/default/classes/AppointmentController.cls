@@ -122,7 +122,7 @@ public with sharing class AppointmentController {
 
             if (!String.isBlank(appointmentStatus) && appointmentStatus != appointmentToUpdate.Appointment_Status__c) {
                 System.debug('wyrzucam exception 5');
-                appointmentToUpdate.Medical_Facility__c = appointmentStatus;
+                appointmentToUpdate.Appointment_Status__c = appointmentStatus;
                 flag = 1;
             }
 
