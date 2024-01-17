@@ -1,42 +1,44 @@
 import { api, LightningElement, wire, track } from 'lwc';
-import getPatients from '@salesforce/apex/AppointmentController.getAllPatients';
 import getDoctors from '@salesforce/apex/AppointmentController.getAllDoctorsWorkingInCurrentFacility';
 import getSpecialization from '@salesforce/apex/AppointmentController.getAllSpecializationsFromDoctorsWorkingInAFacility';
 import getFacilities from '@salesforce/apex/AppointmentController.getAllFacilities';
 import editAppointment from '@salesforce/apex/AppointmentController.updateAppointment';
+import getAppointmentStatusPicklistValues from '@salesforce/apex/AppointmentController.getAppointmentStatusPicklistValues';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class AppointmentEdit extends LightningElement {
     @api recordId;
 
-    @track patients = [];
     @track doctors = [];
     @track facilities = [];
     @track specializations = [];
+    @track appointmentStatusOptions = [];
     picklistOptions = [
         { label: "Online", value: "Online" },
         { label: "On-Site", value: "On-Site" }
     ];
 
-    @track selectedDoctorId;
-    @track patientId = null;
+    @track selectedDoctorId = null;
     @track selectedFacilityId = null;
     @track selectedSpecializationId = null;
     @track selectedSpecializationLabel = null;
-    @track selectedPicklistValue;
+    @track selectedPicklistValue = null;
+    @track selectedAppointmentStatus = null;
+    @track dateTimeString = null;
 
-
-    @wire(getPatients)
-    wiredPatients({ error, data }) {
+    
+    @wire(getAppointmentStatusPicklistValues)
+    wiredAppointmentStatusOptions({ error, data }) {
         if (data) {
-            this.patients = data.map(patient => ({
-                label: patient.Name,
-                value: patient.Id
+            this.appointmentStatusOptions = data.map(value => ({
+                label: value,
+                value: value
             }));
         } else if (error) {
-            console.error('Błąd pobierania danych o pacjentach', error);
+            console.error('Error fetching appointment status picklist values', error);
         }
     }
+
 
     @wire(getFacilities)
     wiredFacilities({ error, data }) {
@@ -74,15 +76,6 @@ export default class AppointmentEdit extends LightningElement {
         }
     }
 
-    handlePatientChange(event) {
-        console.log('recordID: ' + this.recordId)
-        this.patientId = event.detail.value;
-        this.selectedFacilityId = null;
-        this.selectedSpecializationId = null;
-        this.selectedDoctorId = null;
-        this.doctors = [];
-    }
-
     handleFacilityChange(event) {
         this.selectedFacilityId = event.detail.value;
         this.selectedSpecializationId = null;
@@ -99,7 +92,6 @@ export default class AppointmentEdit extends LightningElement {
     }
 
     handlePicklistChange(event) {
-        console.log('pacjetn: ' + this.patientId)
         this.selectedPicklistValue = event.detail.value;
     }
 
@@ -107,14 +99,19 @@ export default class AppointmentEdit extends LightningElement {
         this.dateTimeString = event.target.value;
     }
 
+    handleAppointmentStatusChange(event) {
+        this.selectedAppointmentStatus = event.detail.value;
+    }
+
     handleAppointmentBooking() {
-        
+        console.log('id: ' + this.selectedFacilityId)
         editAppointment({
+            appointmentId: this.recordId,
             facilityId: this.selectedFacilityId,
             doctorId: this.selectedDoctorId,
-            patientId: this.patientId,
             isOnline: this.selectedPicklistValue,
-            dateTimeString: this.dateTimeString
+            dateTimeString: this.dateTimeString,
+            appointmentStatus: this.selectedAppointmentStatus
         }).then(() => {
                 this.selectedFacilityId = null
                 this.selectedDoctorId = null
@@ -123,20 +120,33 @@ export default class AppointmentEdit extends LightningElement {
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Success',
-                        message: 'Appointment booked successfully!',
+                        message: 'Appointment edited successfully!',
                         variant: 'success'
                     })
                 );
             })
             .catch(error => {
-                const errorMessage = error.body.pageErrors[0].message
-                this.dispatchEvent(
+                console.log(JSON.stringify(error))
+                console.log(JSON.stringify(error.body))
+                if (error.body.pageErrors === undefined) {
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Error',
+                            message: 'Record has not been updated',
+                            variant: 'error'
+                        })
+                    );
+                } else {
+                    const errorMessage = error.body.pageErrors[0].message
+                    this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Error',
                         message: errorMessage,
                         variant: 'error'
                     })
                 );
+                }
+                
             })
     }
 
@@ -150,7 +160,11 @@ export default class AppointmentEdit extends LightningElement {
 
     get doctorOptions() {
         return this.doctors.sort((a, b) => a.label.localeCompare(b.label));
-    }    
+    }
+
+    get appointmentStatusPicklistOptions() {
+        return this.appointmentStatusOptions;
+    }
 
     get isSpecializationDisabled() {
         return !this.selectedFacilityId;
@@ -160,15 +174,13 @@ export default class AppointmentEdit extends LightningElement {
         return !this.selectedSpecializationId || !this.selectedFacilityId;
     }
 
-    get patientsOptions() {
-        return this.patients;
-    }
-
     get isBookDisabled() {
-        return  !this.selectedFacilityId ||
-                !this.selectedSpecializationId ||
-                !this.selectedDoctorId ||
-                !this.dateTimeString ||
-                !this.patientId;
-    }    
+        return (
+            this.selectedFacilityId === null &&
+            this.selectedSpecializationId === null &&
+            this.selectedDoctorId === null &&
+            this.selectedAppointmentStatus === null &&
+            this.dateTimeString === null
+        );
+    }   
 }

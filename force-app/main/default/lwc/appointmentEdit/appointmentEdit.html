@@ -3,11 +3,11 @@
 
         <div class="slds-m-around_medium">
             <lightning-combobox
-                name="personSelection"
-                label="Select person for a medical appointment"
-                value={selectedPatientId}
-                options={patientsOptions}
-                onchange={handlePatientChange}>
+                name="appointmentStatusSelection"
+                label="Choose appointment status"
+                value={selectedAppointmentStatus}
+                options={appointmentStatusPicklistOptions}
+                onchange={handleAppointmentStatusChange}>
             </lightning-combobox>
         </div>
 

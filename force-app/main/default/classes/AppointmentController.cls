@@ -44,6 +44,19 @@ public with sharing class AppointmentController {
         );
     }
 
+    @AuraEnabled(cacheable=true)
+    public static List<String> getAppointmentStatusPicklistValues() {
+        List<String> picklistValues = new List<String>();
+        Schema.DescribeFieldResult fieldResult = Medical_Appointment__c.Appointment_Status__c.getDescribe();
+        List<Schema.PicklistEntry> picklistEntries = fieldResult.getPicklistValues();
+        
+        for (Schema.PicklistEntry entry : picklistEntries) {
+            picklistValues.add(entry.getLabel());
+        }
+        
+        return picklistValues;
+    }
+
     @AuraEnabled
     public static void saveAppointment(
             String facilityId, String doctorId, String patientId, String isOnline, String dateTimeString
@@ -69,52 +82,66 @@ public with sharing class AppointmentController {
 
     @AuraEnabled
     public static void updateAppointment(
-            String[] fieldsToUpdate
-            // String appointmentId, String facilityId, String doctorId, String patientId, String isOnline, String dateTimeString, String appointmentStatus
+            String appointmentId, String facilityId, String doctorId, String isOnline, String dateTimeString, String appointmentStatus
         ) {
-            System.debug(fieldsToUpdate);
-            // Medical_Appointment__c appointmentToUpdate = [
-            //     select Appointment_Date__c, Appointment_Status__c, Doctor__c, Patient__c, Medical_Facility__c, RecordTypeId from Medical_Appointment__c
-            //     where Id = :appointmentId
-            // ];
+            Integer flag = 0;
+            Id recordId = isOnline == 'Online' ? 
+            AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'Online')
+            : AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'On Site');
+            Medical_Appointment__c appointmentToUpdate = [
+                select Appointment_Date__c, Appointment_Status__c, Doctor__c, Patient__c, Medical_Facility__c, RecordTypeId from Medical_Appointment__c
+                where Id = :appointmentId
+            ];
 
-            // if (String.isBlank(facilityId)) {
-            //     appointmentToUpdate.Medical_Facility__c = facilityId;
-            // }
+            if (!String.isBlank(facilityId) && facilityId != appointmentToUpdate.Medical_Facility__c) {
+                System.debug('wyrzucam exception 1');
+                appointmentToUpdate.Medical_Facility__c = facilityId;
+                flag = 1;
+            }
 
-            // if (String.isBlank(doctorId)) {
-            //     appointmentToUpdate.Doctor__c = doctorId;
-            // }
+            if (!String.isBlank(doctorId) && doctorId != appointmentToUpdate.Doctor__c) {
+                System.debug('wyrzucam exception 2');
+                appointmentToUpdate.Doctor__c = doctorId;
+                flag = 1;
+            }
 
-            // if (String.isBlank(patientId)) {
-            //     appointmentToUpdate.Patient__c = patientId;
-            // }
+            if (!String.isBlank(isOnline) && appointmentToUpdate.RecordTypeId != recordId) {
+                System.debug('wyrzucam exception 3');
+                appointmentToUpdate.RecordTypeId = recordId;
+                flag = 1;
+            }
 
-            // if (String.isBlank(isOnline)) {
-            //     Id recordId = isOnline == 'Online' ? 
-            //     AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'Online')
-            //     : AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'On Site');
-            //     appointmentToUpdate.RecordTypeId = recordId;
-            // }
+            if (
+                !String.isBlank(dateTimeString) && 
+                DateTime.valueOf(dateTimeString.replace('T', ' ')) != appointmentToUpdate.Appointment_Date__c
+            ) {
+                System.debug('wyrzucam exception 4');
+                appointmentToUpdate.Appointment_Date__c = DateTime.valueOf(dateTimeString.replace('T', ' '));
+                flag = 1;
+            }
 
-            // if (String.isBlank(dateTimeString)) {
-            //     appointmentToUpdate.Appointment_Date__c = DateTime.valueOf(dateTimeString.replace('T', ' '));
-            // }
+            if (!String.isBlank(appointmentStatus) && appointmentStatus != appointmentToUpdate.Appointment_Status__c) {
+                System.debug('wyrzucam exception 5');
+                appointmentToUpdate.Medical_Facility__c = appointmentStatus;
+                flag = 1;
+            }
 
-            // // if (String.isBlank(appointmentStatus)) {
-            // //     appointmentToUpdate.Medical_Facility__c = appointmentStatus;
-            // // }
+            try {
+                if (flag == 1) {
+                    update appointmentToUpdate;
+                } else {
+                    System.debug('Throwing custom exception: No record has been updated!');
+                    throw new AuraHandledException('No record has been updated!');
+                }
+            } catch (DmlException de) {
+                System.debug('Caught DMLException: ' + de.getMessage());
+                throw new AuraHandledException('Error updating record: ' + de.getMessage());
+            } catch (Exception e) {
+                System.debug('Caught generic Exception: ' + e.getMessage());
+                throw new AuraHandledException('An unexpected error occurred: ' + e.getMessage());
+            }
             
-            // update appointmentToUpdate;
     }
-
-    // private static Boolean[] defineWhichFieldsToChange(String[] checkIfFieldToUpdateString) {
-    //     Boolean[] fieldsToChange = {false, false, false, false, false, false};
-    //     for(Integer i = 0; i<checkIfFieldToUpdateString.length(); i++) {
-    //         fieldsToChange[i] = String.isBlank(checkIfFieldToUpdateString[i]) ? false : true;
-    //     }
-    //     return fieldsToChange;
-    // }
 
     public static Id getRecordTypeIdbyName(String objectName, String strRecordTypeName){
         return  Schema.getGlobalDescribe().get(objectName).getDescribe().getRecordTypeInfosByName().get(strRecordTypeName).getRecordTypeId();
