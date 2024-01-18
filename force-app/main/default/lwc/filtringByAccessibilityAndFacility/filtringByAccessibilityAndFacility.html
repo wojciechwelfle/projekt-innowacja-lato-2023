@@ -1,5 +1,15 @@
 <template>
-    <lightning-card title="Edit an appointment">
+    <lightning-card title="Book an appointment">
+        
+        <div class="slds-m-around_medium">
+            <lightning-combobox
+                name="patientSelection"
+                label="Choose a patient"
+                value={patientId}
+                options={patientsOptions}
+                onchange={handlePatientChange}>
+            </lightning-combobox>
+        </div>
 
         <div class="slds-m-around_medium">
             <lightning-combobox

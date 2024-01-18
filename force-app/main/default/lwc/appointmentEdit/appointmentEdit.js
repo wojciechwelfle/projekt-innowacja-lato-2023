@@ -176,6 +176,10 @@ export default class AppointmentEdit extends LightningElement {
 
     get isBookDisabled() {
         return (
+            this.selectedFacilityId !== null && this.doctorId === null
+        )
+        ||
+        (
             this.selectedFacilityId === null &&
             this.selectedSpecializationId === null &&
             this.selectedDoctorId === null &&
