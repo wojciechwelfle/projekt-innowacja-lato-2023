@@ -181,6 +181,9 @@ export default class AppointmentEdit extends LightningElement {
             this.selectedDoctorId === null &&
             this.selectedAppointmentStatus === null &&
             this.dateTimeString === null
+        ) ||
+        (
+            this.selectedFacilityId !== null && this.selectedDoctorId === null
         );
     }   
 }
