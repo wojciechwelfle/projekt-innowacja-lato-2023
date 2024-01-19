@@ -6,7 +6,6 @@ trigger InsuranceCheck on Medical_Appointment__c (after insert,after update) {
         WHERE Id IN :Trigger.new AND Medical_Facility__r.Type__c = 'Hospital'
     ];
     
-    //System.debug(newAppointments);
     Set<Id> patientIds = new Set<Id>();
     for (Medical_Appointment__c appointment : newAppointments) {
         patientIds.add(appointment.Patient__c);  
@@ -22,11 +21,10 @@ trigger InsuranceCheck on Medical_Appointment__c (after insert,after update) {
     for (Medical_Insurence__c insurance : newInsurances) {
         insuredPatients.add(insurance.Insured_Person__c);
     }
-   // System.debug(insuredPatients);
+   
     
     for (Medical_Appointment__c appointment : newAppointments) {
         if (!insuredPatients.contains(appointment.Patient__c)  ) { 
-           // System.debug('throw exeption');
             Trigger.newMap.get(appointment.Id).addError('Cannot add patient without insurance!');
         }
     }
