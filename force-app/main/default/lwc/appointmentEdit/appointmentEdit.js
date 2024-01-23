@@ -5,6 +5,12 @@ import getFacilities from '@salesforce/apex/AppointmentController.getAllFaciliti
 import editAppointment from '@salesforce/apex/AppointmentController.updateAppointment';
 import getAppointmentStatusPicklistValues from '@salesforce/apex/AppointmentController.getAppointmentStatusPicklistValues';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import FACILITY from '@salesforce/schema/Medical_Appointment__c.Medical_Facility__c';
+import DOCTOR from '@salesforce/schema/Medical_Appointment__c.Doctor__c';
+import SPECIALIZATION from '@salesforce/schema/Person__c.Specialization__c';
+import STATUS from '@salesforce/schema/Medical_Appointment__c.Appointment_Status__c';
+import APPOINTMENT_DATE from '@salesforce/schema/Medical_Appointment__c.Appointment_Date__c';
 
 export default class AppointmentEdit extends LightningElement {
     @api recordId;
@@ -15,7 +21,7 @@ export default class AppointmentEdit extends LightningElement {
     @track appointmentStatusOptions = [];
     picklistOptions = [
         { label: "Online", value: "Online" },
-        { label: "On-Site", value: "On-Site" }
+        { label: "On Site", value: "On Site" }
     ];
 
     @track selectedDoctorId = null;
@@ -25,6 +31,35 @@ export default class AppointmentEdit extends LightningElement {
     @track selectedPicklistValue = null;
     @track selectedAppointmentStatus = null;
     @track dateTimeString = null;
+
+    
+    @wire(getRecord, { recordId: "$recordId", fields: [FACILITY, DOCTOR, STATUS, APPOINTMENT_DATE] })
+    wireCurrentAppointment({ data,error}) {
+       if(data)
+       {
+        // console.log(data)
+        this.selectedFacilityId = getFieldValue(data, FACILITY);
+        this.selectedDoctorId = getFieldValue(data, DOCTOR);
+        this.selectedAppointmentStatus = getFieldValue(data, STATUS);
+        this.dateTimeString = getFieldValue(data, APPOINTMENT_DATE);
+        this.selectedPicklistValue = data.recordTypeInfo.name;
+        console.log(this.selectedPicklistValue)
+       }
+       else if(error)
+       {
+       }
+    }
+
+    @wire(getRecord, { recordId: "$selectedDoctorId", fields: [SPECIALIZATION] })
+    wireToGetSpecialization({ data,error }) {
+       if(data)
+       {
+        this.selectedSpecializationId = getFieldValue(data, SPECIALIZATION);
+       }
+       else if(error)
+       {
+       }
+    }
 
     
     @wire(getAppointmentStatusPicklistValues)

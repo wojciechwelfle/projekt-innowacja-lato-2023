@@ -99,7 +99,6 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     }
 
     handlePicklistChange(event) {
-        console.log('pacjetn: ' + this.patientId)
         this.selectedPicklistValue = event.detail.value;
     }
 
