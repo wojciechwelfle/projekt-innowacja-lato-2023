@@ -40,6 +40,7 @@ public with sharing class AppointmentController {
                 and Medical_Facility__c =: facilityId
                 and Specialization__c =: specialization
                 with SECURITY_ENFORCED
+                order by Last_Name__c asc
             ]
         );
     }
@@ -62,8 +63,8 @@ public with sharing class AppointmentController {
             String facilityId, String doctorId, String patientId, String isOnline, String dateTimeString
         ) {
             Id recordId = isOnline == 'Online' ? 
-            AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'Online')
-            : AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'On Site');
+            AppointmentController.getRecordTypeIdbyName('Online')
+            : AppointmentController.getRecordTypeIdbyName('On Site');
             
             AggregateResult name = [select count(Patient__c) from Medical_Appointment__c where Medical_Facility__c =: facilityId and Patient__c =: patientId];
 
@@ -86,8 +87,8 @@ public with sharing class AppointmentController {
         ) {
             Integer flag = 0;
             Id recordId = isOnline == 'Online' ? 
-            AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'Online')
-            : AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'On Site');
+            AppointmentController.getRecordTypeIdbyName('Online')
+            : AppointmentController.getRecordTypeIdbyName('On Site');
             Medical_Appointment__c appointmentToUpdate = [
                 select Appointment_Date__c, Appointment_Status__c, Doctor__c, Patient__c, Medical_Facility__c, RecordTypeId from Medical_Appointment__c
                 where Id = :appointmentId
@@ -143,8 +144,8 @@ public with sharing class AppointmentController {
             
     }
 
-    public static Id getRecordTypeIdbyName(String objectName, String strRecordTypeName){
-        return  Schema.getGlobalDescribe().get(objectName).getDescribe().getRecordTypeInfosByName().get(strRecordTypeName).getRecordTypeId();
+    public static Id getRecordTypeIdbyName(String strRecordTypeName){
+        return  Medical_Facility__c.getSObjectType().getDescribe().getRecordTypeInfosByName().get(strRecordTypeName).getRecordTypeId();
     }
 
 }

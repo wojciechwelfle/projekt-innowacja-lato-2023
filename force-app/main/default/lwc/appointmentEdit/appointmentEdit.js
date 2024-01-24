@@ -90,10 +90,13 @@ export default class AppointmentEdit extends LightningElement {
     @wire(getSpecialization, { facilityId: "$selectedFacilityId" })
     wiredSpecialization({ error, data }) {
         if (data) {
+
             this.specializations = data.map(specialization => ({
                 label: specialization.Specialization__c,
                 value: specialization.Specialization__c
             }));
+
+            
         } else if (error) {
             console.error('Błąd pobierania specjalizacji', error);
         }
@@ -102,7 +105,7 @@ export default class AppointmentEdit extends LightningElement {
     @wire(getDoctors, { facilityId: "$selectedFacilityId", specialization: "$selectedSpecializationId" })
     wiredDoctors({ error, data }) {
         if (data) {
-            this.doctors = data.map(doctor => ({
+            this.allDoctors = data.map(doctor => ({
                 label: doctor.Last_Name__c + " " + doctor.Name,
                 value: doctor.Id
             }));
@@ -185,22 +188,6 @@ export default class AppointmentEdit extends LightningElement {
             })
     }
 
-    get facilitiesOptions() {
-        return this.facilities;
-    }
-
-    get specializationOptions() {
-        return this.specializations;
-    }
-
-    get doctorOptions() {
-        return this.doctors.sort((a, b) => a.label.localeCompare(b.label));
-    }
-
-    get appointmentStatusPicklistOptions() {
-        return this.appointmentStatusOptions;
-    }
-
     get isSpecializationDisabled() {
         return !this.selectedFacilityId;
     }
@@ -216,9 +203,6 @@ export default class AppointmentEdit extends LightningElement {
             this.selectedDoctorId === null &&
             this.selectedAppointmentStatus === null &&
             this.dateTimeString === null
-        ) ||
-        (
-            this.selectedFacilityId !== null && this.selectedDoctorId === null
         );
     }   
 }
