@@ -4,6 +4,7 @@ import getSpecialization from '@salesforce/apex/AppointmentController.getAllSpec
 import getFacilities from '@salesforce/apex/AppointmentController.getAllFacilities';
 import editAppointment from '@salesforce/apex/AppointmentController.updateAppointment';
 import getAppointmentStatusPicklistValues from '@salesforce/apex/AppointmentController.getAppointmentStatusPicklistValues';
+import getVisitTIme from '@salesforce/apex/AppointmentController.returnAllAvailableHoursForSingleDoctor';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import FACILITY from '@salesforce/schema/Medical_Appointment__c.Medical_Facility__c';
@@ -16,6 +17,7 @@ export default class AppointmentEdit extends LightningElement {
     @api recordId;
 
     @track doctors = [];
+    @track times = []
     @track facilities = [];
     @track specializations = [];
     @track appointmentStatusOptions = [];
@@ -24,6 +26,7 @@ export default class AppointmentEdit extends LightningElement {
         { label: "On Site", value: "On Site" }
     ];
 
+    @track selectedTime = null;
     @track selectedDoctorId = null;
     @track selectedFacilityId = null;
     @track selectedSpecializationId = null;
@@ -35,29 +38,25 @@ export default class AppointmentEdit extends LightningElement {
     
     @wire(getRecord, { recordId: "$recordId", fields: [FACILITY, DOCTOR, STATUS, APPOINTMENT_DATE] })
     wireCurrentAppointment({ data,error}) {
-       if(data)
-       {
-        // console.log(data)
-        this.selectedFacilityId = getFieldValue(data, FACILITY);
-        this.selectedDoctorId = getFieldValue(data, DOCTOR);
-        this.selectedAppointmentStatus = getFieldValue(data, STATUS);
-        this.dateTimeString = getFieldValue(data, APPOINTMENT_DATE);
-        this.selectedPicklistValue = data.recordTypeInfo.name;
-        console.log(this.selectedPicklistValue)
+       if(data){
+            this.selectedFacilityId = getFieldValue(data, FACILITY);
+            this.selectedDoctorId = getFieldValue(data, DOCTOR);
+            this.selectedAppointmentStatus = getFieldValue(data, STATUS);
+            this.dateTimeString = getFieldValue(data, APPOINTMENT_DATE);
+            console.log(this.dateTimeString)
+            this.selectedPicklistValue = data.recordTypeInfo.name;
        }
-       else if(error)
-       {
+       else if(error){
+
        }
     }
 
     @wire(getRecord, { recordId: "$selectedDoctorId", fields: [SPECIALIZATION] })
     wireToGetSpecialization({ data,error }) {
-       if(data)
-       {
-        this.selectedSpecializationId = getFieldValue(data, SPECIALIZATION);
+       if(data){
+            this.selectedSpecializationId = getFieldValue(data, SPECIALIZATION);
        }
-       else if(error)
-       {
+       else if(error){
        }
     }
 
@@ -105,12 +104,29 @@ export default class AppointmentEdit extends LightningElement {
     @wire(getDoctors, { facilityId: "$selectedFacilityId", specialization: "$selectedSpecializationId" })
     wiredDoctors({ error, data }) {
         if (data) {
-            this.allDoctors = data.map(doctor => ({
+            this.doctors = data.map(doctor => ({
                 label: doctor.Last_Name__c + " " + doctor.Name,
                 value: doctor.Id
             }));
         } else if (error) {
             console.error('Błąd pobierania danych lekarzy', error);
+        }
+    }
+
+    @wire(getVisitTIme, { 
+        dateTimeString: "$dateTimeString", 
+        medicalId: "$selectedFacilityId", 
+        doctorId: "$selectedDoctorId" 
+    })
+    wiredVisits({ error, data }) {
+        if (data) {
+            console.log(data)
+            this.times = data.map(visit => ({
+                label: visit,
+                value: visit
+            }));
+        } else if (error) {
+            console.error('Błąd pobierania godzin', error);
         }
     }
 
@@ -139,6 +155,10 @@ export default class AppointmentEdit extends LightningElement {
 
     handleAppointmentStatusChange(event) {
         this.selectedAppointmentStatus = event.detail.value;
+    }
+
+    handleTimeChange(event) {
+        this.selectedTime = event.detail.value;
     }
 
     handleAppointmentBooking() {
@@ -205,4 +225,6 @@ export default class AppointmentEdit extends LightningElement {
             this.dateTimeString === null
         );
     }   
+
+    
 }

@@ -4,18 +4,21 @@ import getDoctors from '@salesforce/apex/AppointmentController.getAllDoctorsWork
 import getSpecialization from '@salesforce/apex/AppointmentController.getAllSpecializationsFromDoctorsWorkingInAFacility';
 import getFacilities from '@salesforce/apex/AppointmentController.getAllFacilities';
 import bookAppointment from '@salesforce/apex/AppointmentController.saveAppointment';
+import getVisitTIme from '@salesforce/apex/AppointmentController.returnAllAvailableHoursForSingleDoctor';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class FiltringByAccessibilityAndFacility extends LightningElement {
+export default class FiltringByAccessibilityAndFacility extends NavigationMixin(LightningElement) {
     @api recordId;
 
     @track patients = [];
     @track doctors = [];
     @track facilities = [];
     @track specializations = [];
+    @track times = []
     picklistOptions = [
         { label: "Online", value: "Online" },
-        { label: "On-Site", value: "On-Site" }
+        { label: "On Site", value: "On Site" }
     ];
 
     @track selectedDoctorId;
@@ -23,7 +26,9 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     @track selectedFacilityId = null;
     @track selectedSpecializationId = null;
     @track selectedSpecializationLabel = null;
-    @track selectedPicklistValue;
+    @track selectedPicklistValue = null;
+    @track dateString = null;
+    @track selectedTime = null;
 
 
     @wire(getPatients)
@@ -74,6 +79,24 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
         }
     }
 
+    @wire(getVisitTIme, { 
+        dateTimeString: "$dateString", 
+        medicalId: "$selectedFacilityId", 
+        doctorId: "$selectedDoctorId" 
+    })
+    wiredVisits({ error, data }) {
+        if (data) {
+            console.log(data)
+            this.times = data.map(visit => ({
+                label: visit,
+                value: visit
+            }));
+        } else if (error) {
+            console.log(this.dateString)
+            console.error('Błąd pobierania godzin', error);
+        }
+    }
+
     handlePatientChange(event) {
         console.log('recordID: ' + this.recordId)
         this.patientId = event.detail.value;
@@ -103,40 +126,63 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
     }
 
     handleDateTimeChange(event) {
-        this.dateTimeString = event.target.value;
+        this.dateString = event.target.value;
+    }
+
+    handleTimeChange(event) {
+        this.selectedTime = event.detail.value;
     }
 
     handleAppointmentBooking() {
+        console.log('Booking appointment with the following data:');
+        console.log(
+            'facility: ' + this.selectedFacilityId +
+            ',\ndoctor: ' + this.selectedDoctorId +
+            ',\npatient: ' + this.patientId +
+            ',\nisOnline: ' + this.selectedPicklistValue +
+            ',\ndateTime: ' + this.dateString +
+            ',\nvisitTime: ' + this.selectedTime
+        );
         bookAppointment({
             facilityId: this.selectedFacilityId,
             doctorId: this.selectedDoctorId,
             patientId: this.patientId,
             isOnline: this.selectedPicklistValue,
-            dateTimeString: this.dateTimeString
-        }).then(() => {
-                this.selectedFacilityId = null
-                this.selectedDoctorId = null
-                this.selectedPicklistValue = null
+            dateTimeString: this.dateString,
+            visitTime: this.selectedTime,
+            appointmentId: null,
+            appointmentStatus: null
+        })
+        .then(() => {
+            this.selectedFacilityId = null;
+            this.selectedDoctorId = null;
+            this.selectedPicklistValue = null;
+            this.visitTime = null;
+            this.dateString = null;
+            this.patientId = null;
+            
 
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Success',
-                        message: 'Appointment booked successfully!',
-                        variant: 'success'
-                    })
-                );
-            })
-            .catch(error => {
-                const errorMessage = error.body.pageErrors[0].message
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Error',
-                        message: errorMessage,
-                        variant: 'error'
-                    })
-                );
-            })
-    }
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Appointment booked successfully!',
+                    variant: 'success'
+                })
+            );
+        })
+        .catch(error => {
+            const errorMessage = error.body.pageErrors ? error.body.pageErrors[0].message : 'Unknown error';
+
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: errorMessage,
+                    variant: 'error'
+                })
+            );
+        });
+}
+
 
     get facilitiesOptions() {
         return this.facilities;
@@ -166,7 +212,17 @@ export default class FiltringByAccessibilityAndFacility extends LightningElement
         return  !this.selectedFacilityId ||
                 !this.selectedSpecializationId ||
                 !this.selectedDoctorId ||
-                !this.dateTimeString ||
-                !this.patientId;
+                !this.dateString ||
+                !this.selectedTime ||
+                !this.patientId ||
+                !this.selectedPicklistValue;
     }    
+
+    get isDateDisabled() {
+        return !this.selectedDoctorId;
+    }
+
+    get isTimeDisabled() {
+        return !this.dateString;
+    }
 }
