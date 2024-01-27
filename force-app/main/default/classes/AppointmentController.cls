@@ -62,8 +62,12 @@ public with sharing class AppointmentController {
     public static List<String> returnAllAvailableHoursForSingleDoctor(String dateTimeString, String medicalId, String doctorId) {
         DateTime appDate = DateTime.newInstance(Date.valueOf(dateTimeString), Time.newInstance(1, 0, 0, 0));
         String day = appDate.format('EEEE');
-        String query = ('select ' + day + '_Open_Hours__c, ' + day + '_Close_Hours__c from Medical_Facility__c where Id = \'' + medicalId + '\'');
-
+        String query = String.join(new List<String>{
+            'SELECT ' + day + '_Open_Hours__c, ' + day + '_Close_Hours__c',
+            'FROM Medical_Facility__c',
+            'WHERE Id = \'' + medicalId + '\''
+        }, ' ');
+        
         List<Medical_Facility__c> result = Database.query(query);
 
         Time openHours = (Time) result[0].get(day + '_Open_Hours__c');
@@ -118,8 +122,8 @@ public with sharing class AppointmentController {
             
             Person__c doctor = [select Name, Last_Name__c from Person__c where Id =: doctorId];
 
-            Integer hour = Integer.valueOf(visitTime.substring(0,1));
-            Integer minute = Integer.valueOf(visitTime.substring(3,4));
+            Integer hour = Integer.valueOf(visitTime.substring(0,2));
+            Integer minute = Integer.valueOf(visitTime.substring(3,5));
 
             DateTime timeOfVisit = DateTime.newInstance(Date.valueOf(dateTimeString), Time.newInstance(hour, minute, 0, 0));
             
@@ -149,7 +153,6 @@ public with sharing class AppointmentController {
 
                 update appointment;
             }
-            
     }
 
     public static Id getRecordTypeIdbyName(String strRecordTypeName){

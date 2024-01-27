@@ -86,14 +86,11 @@ export default class FiltringByAccessibilityAndFacility extends NavigationMixin(
     })
     wiredVisits({ error, data }) {
         if (data) {
-            console.log(data)
             this.times = data.map(visit => ({
                 label: visit,
                 value: visit
             }));
         } else if (error) {
-            console.log(this.dateString)
-            console.error('Błąd pobierania godzin', error);
         }
     }
 
@@ -134,15 +131,6 @@ export default class FiltringByAccessibilityAndFacility extends NavigationMixin(
     }
 
     handleAppointmentBooking() {
-        console.log('Booking appointment with the following data:');
-        console.log(
-            'facility: ' + this.selectedFacilityId +
-            ',\ndoctor: ' + this.selectedDoctorId +
-            ',\npatient: ' + this.patientId +
-            ',\nisOnline: ' + this.selectedPicklistValue +
-            ',\ndateTime: ' + this.dateString +
-            ',\nvisitTime: ' + this.selectedTime
-        );
         bookAppointment({
             facilityId: this.selectedFacilityId,
             doctorId: this.selectedDoctorId,
@@ -169,6 +157,14 @@ export default class FiltringByAccessibilityAndFacility extends NavigationMixin(
                     variant: 'success'
                 })
             );
+
+            this[NavigationMixin.Navigate]({
+                type: 'standard__objectPage',
+                attributes: {
+                    objectApiName: 'Medical_Appointment__c',
+                    actionName: 'list'
+                }
+            });
         })
         .catch(error => {
             const errorMessage = error.body.pageErrors ? error.body.pageErrors[0].message : 'Unknown error';
@@ -193,7 +189,7 @@ export default class FiltringByAccessibilityAndFacility extends NavigationMixin(
     }
 
     get doctorOptions() {
-        return this.doctors.sort((a, b) => a.label.localeCompare(b.label));
+        return this.doctors;
     }    
 
     get isSpecializationDisabled() {
