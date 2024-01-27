@@ -40,6 +40,7 @@ public with sharing class AppointmentController {
                 and Medical_Facility__c =: facilityId
                 and Specialization__c =: specialization
                 with SECURITY_ENFORCED
+                order by Last_Name__c asc
             ]
         );
     }
@@ -57,94 +58,105 @@ public with sharing class AppointmentController {
         return picklistValues;
     }
 
+    @AuraEnabled(cacheable=true)
+    public static List<String> returnAllAvailableHoursForSingleDoctor(String dateTimeString, String medicalId, String doctorId) {
+        DateTime appDate = DateTime.newInstance(Date.valueOf(dateTimeString), Time.newInstance(1, 0, 0, 0));
+        String day = appDate.format('EEEE');
+        String query = String.join(new List<String>{
+            'SELECT ' + day + '_Open_Hours__c, ' + day + '_Close_Hours__c',
+            'FROM Medical_Facility__c',
+            'WHERE Id = \'' + medicalId + '\''
+        }, ' ');
+        
+        List<Medical_Facility__c> result = Database.query(query);
+
+        Time openHours = (Time) result[0].get(day + '_Open_Hours__c');
+        Time closeHours = (Time) result[0].get(day + '_Close_Hours__c');
+
+        List<String> availableTime = new List<String>();
+
+        String appointmentQuery = String.join(new List<String>{
+            'SELECT Appointment_Date__c FROM Medical_Appointment__c WHERE',
+            'Doctor__c = \'' + doctorId + '\'',
+            'AND Appointment_Date__c >= ' + String.valueOf(appDate.date()) + 'T00:00:00.000Z',
+            'AND Appointment_Date__c <= ' + String.valueOf(appDate.date()) + 'T23:59:59.999Z'
+        }, ' ');
+
+        List<Medical_Appointment__c> appointments = Database.query(appointmentQuery);
+        List<Time> appointmentsTime = new List<Time>();
+        
+        for(Medical_Appointment__c appointment : appointments) {
+            appointmentsTime.add(Time.newInstance(appointment.Appointment_Date__c.hour(), appointment.Appointment_Date__c.minute(), 0, 0));
+        }
+
+        while(openHours < closeHours) {
+            Integer i = canTimeBeAddedToVisit(appointmentsTime, openHours);
+            if (i != -1) {
+                appointmentsTime.remove(i);
+            } else {
+                availableTime.add(String.valueOf(openHours).substring(0, 5));
+            }
+            
+            openHours = openHours.addMinutes(20);
+        }
+
+        return availableTime;
+    }
+
+    private static Integer canTimeBeAddedToVisit(List<Time> times, Time openHours) {
+        for(Integer i = 0; i < times.size(); i++) {
+            if (times[i] > openHours && times[i] < openHours.addMinutes(20)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     @AuraEnabled
     public static void saveAppointment(
-            String facilityId, String doctorId, String patientId, String isOnline, String dateTimeString
+            String facilityId, String doctorId, String patientId, String isOnline, String dateTimeString, String visitTime, String appointmentId, String appointmentStatus
         ) {
             Id recordId = isOnline == 'Online' ? 
-            AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'Online')
-            : AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'On Site');
+            AppointmentController.getRecordTypeIdbyName('Online')
+            : AppointmentController.getRecordTypeIdbyName('On Site');
             
-            AggregateResult name = [select count(Patient__c) from Medical_Appointment__c where Medical_Facility__c =: facilityId and Patient__c =: patientId];
+            Person__c doctor = [select Name, Last_Name__c from Person__c where Id =: doctorId];
 
-            Medical_Appointment__c appointment = new Medical_Appointment__c(
-                Name=String.valueOf((Integer)name.get('expr0')) + ' visit', 
-                Doctor__c=doctorId, 
-                Medical_Facility__c=facilityId, 
-                Patient__c=patientId, 
-                Appointment_Status__c='Upcoming', 
-                Appointment_Date__c = DateTime.valueOf(dateTimeString.replace('T', ' ')),
-                RecordTypeId = recordId
-            );
+            Integer hour = Integer.valueOf(visitTime.substring(0,2));
+            Integer minute = Integer.valueOf(visitTime.substring(3,5));
 
-            insert appointment;
+            DateTime timeOfVisit = DateTime.newInstance(Date.valueOf(dateTimeString), Time.newInstance(hour, minute, 0, 0));
+            
+            if (appointmentStatus == null) {
+                Medical_Appointment__c appointment = new Medical_Appointment__c(
+                    Name='Appointment visit with ' + doctor.Name + ' ' + doctor.Last_Name__c, 
+                    Doctor__c=doctorId, 
+                    Medical_Facility__c=facilityId, 
+                    Patient__c=patientId, 
+                    Appointment_Status__c='Upcoming', 
+                    Appointment_Date__c = timeOfVisit,
+                    RecordTypeId = recordId
+                );
+
+                insert appointment;
+            } else {
+                Medical_Appointment__c appointment = new Medical_Appointment__c(
+                    Id = appointmentId,
+                    Name='Appointment with ' + doctor.Name + ' ' + doctor.Last_Name__c, 
+                    Doctor__c=doctorId, 
+                    Medical_Facility__c=facilityId, 
+                    Patient__c=patientId, 
+                    Appointment_Status__c=appointmentStatus, 
+                    Appointment_Date__c = timeOfVisit,
+                    RecordTypeId = recordId
+                );
+
+                update appointment;
+            }
     }
 
-    @AuraEnabled
-    public static void updateAppointment(
-            String appointmentId, String facilityId, String doctorId, String isOnline, String dateTimeString, String appointmentStatus
-        ) {
-            Integer flag = 0;
-            Id recordId = isOnline == 'Online' ? 
-            AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'Online')
-            : AppointmentController.getRecordTypeIdbyName('Medical_Appointment__c', 'On Site');
-            Medical_Appointment__c appointmentToUpdate = [
-                select Appointment_Date__c, Appointment_Status__c, Doctor__c, Patient__c, Medical_Facility__c, RecordTypeId from Medical_Appointment__c
-                where Id = :appointmentId
-            ];
-
-            if (!String.isBlank(facilityId) && facilityId != appointmentToUpdate.Medical_Facility__c) {
-                System.debug('wyrzucam exception 1');
-                appointmentToUpdate.Medical_Facility__c = facilityId;
-                flag = 1;
-            }
-
-            if (!String.isBlank(doctorId) && doctorId != appointmentToUpdate.Doctor__c) {
-                System.debug('wyrzucam exception 2');
-                appointmentToUpdate.Doctor__c = doctorId;
-                flag = 1;
-            }
-
-            if (!String.isBlank(isOnline) && appointmentToUpdate.RecordTypeId != recordId) {
-                System.debug('wyrzucam exception 3');
-                appointmentToUpdate.RecordTypeId = recordId;
-                flag = 1;
-            }
-
-            if (
-                !String.isBlank(dateTimeString) && 
-                DateTime.valueOf(dateTimeString.replace('T', ' ')) != appointmentToUpdate.Appointment_Date__c
-            ) {
-                System.debug('wyrzucam exception 4');
-                appointmentToUpdate.Appointment_Date__c = DateTime.valueOf(dateTimeString.replace('T', ' '));
-                flag = 1;
-            }
-
-            if (!String.isBlank(appointmentStatus) && appointmentStatus != appointmentToUpdate.Appointment_Status__c) {
-                System.debug('wyrzucam exception 5');
-                appointmentToUpdate.Appointment_Status__c = appointmentStatus;
-                flag = 1;
-            }
-
-            try {
-                if (flag == 1) {
-                    update appointmentToUpdate;
-                } else {
-                    System.debug('Throwing custom exception: No record has been updated!');
-                    throw new AuraHandledException('No record has been updated!');
-                }
-            } catch (DmlException de) {
-                System.debug('Caught DMLException: ' + de.getMessage());
-                throw new AuraHandledException('Error updating record: ' + de.getMessage());
-            } catch (Exception e) {
-                System.debug('Caught generic Exception: ' + e.getMessage());
-                throw new AuraHandledException('An unexpected error occurred: ' + e.getMessage());
-            }
-            
-    }
-
-    public static Id getRecordTypeIdbyName(String objectName, String strRecordTypeName){
-        return  Schema.getGlobalDescribe().get(objectName).getDescribe().getRecordTypeInfosByName().get(strRecordTypeName).getRecordTypeId();
+    public static Id getRecordTypeIdbyName(String strRecordTypeName){
+        return Medical_Appointment__c.getSObjectType().getDescribe().getRecordTypeInfosByName().get(strRecordTypeName).getRecordTypeId();
     }
 
 }

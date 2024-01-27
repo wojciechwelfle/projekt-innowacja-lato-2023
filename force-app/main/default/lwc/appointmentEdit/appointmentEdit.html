@@ -1,12 +1,12 @@
 <template>
-    <lightning-card title="Book an appointment">
+    <lightning-card title="Edit an appointment">
 
         <div class="slds-m-around_medium">
             <lightning-combobox
                 name="appointmentStatusSelection"
                 label="Choose appointment status"
                 value={selectedAppointmentStatus}
-                options={appointmentStatusPicklistOptions}
+                options={appointmentStatusOptions}
                 onchange={handleAppointmentStatusChange}>
             </lightning-combobox>
         </div>
@@ -16,7 +16,7 @@
                 name="facilitySelection"
                 label="Select facility"
                 value={selectedFacilityId}
-                options={facilitiesOptions}
+                options={facilities}
                 onchange={handleFacilityChange}>
             </lightning-combobox>
         </div>
@@ -26,7 +26,7 @@
                 name="specializationSelection"
                 label="Choose specialization"
                 value={selectedSpecializationId}
-                options={specializationOptions}
+                options={specializations}
                 onchange={handleSpecializationChange}
                 disabled={isSpecializationDisabled}>
             </lightning-combobox>
@@ -37,7 +37,7 @@
                 name="doctorSelection"
                 label="Select doctor"
                 value={selectedDoctorId}
-                options={doctorOptions}
+                options={doctors}
                 onchange={handleDoctorChange}
                 disabled={isDoctorDisabled}>
             </lightning-combobox>
@@ -45,11 +45,19 @@
 
         <div class="slds-m-around_medium">
             <lightning-input
-                type="datetime-local"
+                type="date"
                 label="Select date and time"
-                value={selectedDateTime}
+                value={dateString}
                 onchange={handleDateTimeChange}>
             </lightning-input>
+
+            <lightning-combobox
+                name="timeSelection"
+                label="Choose time"
+                value={selectedTime}
+                options={times}
+                onchange={handleTimeChange}>
+            </lightning-combobox>
         </div>
 
         <div class="slds-m-around_medium">
@@ -65,7 +73,7 @@
 
         <div class="slds-m-around_medium">
             <lightning-button
-                label="Book Appointment"
+                label="Edit Appointment"
                 variant="brand"
                 onclick={handleAppointmentBooking}
                 disabled={isBookDisabled}>

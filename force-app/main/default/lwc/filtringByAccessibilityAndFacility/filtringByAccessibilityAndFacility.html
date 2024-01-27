@@ -1,5 +1,15 @@
 <template>
-    <lightning-card title="Edit an appointment">
+    <lightning-card title="Book an appointment">
+
+        <div class="slds-m-around_medium">
+            <lightning-combobox
+                name="facilitySelection"
+                label="Select patient"
+                value={patientId}
+                options={patients}
+                onchange={handlePatientChange}>
+            </lightning-combobox>
+        </div>
 
         <div class="slds-m-around_medium">
             <lightning-combobox
@@ -35,11 +45,21 @@
 
         <div class="slds-m-around_medium">
             <lightning-input
-                type="datetime-local"
-                label="Select date and time"
-                value={selectedDateTime}
-                onchange={handleDateTimeChange}>
+                type="date"
+                label="Select date"
+                value={dateString}
+                onchange={handleDateTimeChange}
+                disabled={isDateDisabled}>
             </lightning-input>
+
+            <lightning-combobox
+                name="timeSelection"
+                label="Choose time"
+                value={selectedTime}
+                options={times}
+                onchange={handleTimeChange}
+                disabled={isTimeDisabled}>
+            </lightning-combobox>
         </div>
 
         <div class="slds-m-around_medium">

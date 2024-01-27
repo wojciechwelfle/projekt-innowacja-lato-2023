@@ -1,30 +1,70 @@
 import { api, LightningElement, wire, track } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import { NavigationMixin } from 'lightning/navigation';
+
 import getDoctors from '@salesforce/apex/AppointmentController.getAllDoctorsWorkingInCurrentFacility';
 import getSpecialization from '@salesforce/apex/AppointmentController.getAllSpecializationsFromDoctorsWorkingInAFacility';
 import getFacilities from '@salesforce/apex/AppointmentController.getAllFacilities';
-import editAppointment from '@salesforce/apex/AppointmentController.updateAppointment';
+import editAppointment from '@salesforce/apex/AppointmentController.saveAppointment';
 import getAppointmentStatusPicklistValues from '@salesforce/apex/AppointmentController.getAppointmentStatusPicklistValues';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import getVisitTIme from '@salesforce/apex/AppointmentController.returnAllAvailableHoursForSingleDoctor';
 
-export default class AppointmentEdit extends LightningElement {
+import FACILITY from '@salesforce/schema/Medical_Appointment__c.Medical_Facility__c';
+import DOCTOR from '@salesforce/schema/Medical_Appointment__c.Doctor__c';
+import SPECIALIZATION from '@salesforce/schema/Person__c.Specialization__c';
+import STATUS from '@salesforce/schema/Medical_Appointment__c.Appointment_Status__c';
+import APPOINTMENT_DATE from '@salesforce/schema/Medical_Appointment__c.Appointment_Date__c';
+import PATIENT from '@salesforce/schema/Medical_Appointment__c.Patient__c';
+
+
+export default class AppointmentEdit extends NavigationMixin(LightningElement) {
     @api recordId;
 
     @track doctors = [];
+    @track times = []
     @track facilities = [];
     @track specializations = [];
     @track appointmentStatusOptions = [];
     picklistOptions = [
         { label: "Online", value: "Online" },
-        { label: "On-Site", value: "On-Site" }
+        { label: "On Site", value: "On Site" }
     ];
 
+    @track selectedTime = null;
     @track selectedDoctorId = null;
     @track selectedFacilityId = null;
     @track selectedSpecializationId = null;
     @track selectedSpecializationLabel = null;
     @track selectedPicklistValue = null;
     @track selectedAppointmentStatus = null;
-    @track dateTimeString = null;
+    @track dateString = null;
+
+    
+    @wire(getRecord, { recordId: "$recordId", fields: [FACILITY, DOCTOR, STATUS, APPOINTMENT_DATE, PATIENT] })
+    wireCurrentAppointment({ data,error}) {
+       if(data){
+            this.selectedFacilityId = getFieldValue(data, FACILITY);
+            this.selectedDoctorId = getFieldValue(data, DOCTOR);
+            this.selectedAppointmentStatus = getFieldValue(data, STATUS);
+            this.dateString = getFieldValue(data, APPOINTMENT_DATE);
+            this.selectedPicklistValue = data.recordTypeInfo.name;
+            this.patientId = getFieldValue(data, PATIENT);
+            this.selectedTime = this.dateString.substring(11, 16);
+       }
+       else if(error){
+
+       }
+    }
+
+    @wire(getRecord, { recordId: "$selectedDoctorId", fields: [SPECIALIZATION] })
+    wireToGetSpecialization({ data,error }) {
+       if(data){
+            this.selectedSpecializationId = getFieldValue(data, SPECIALIZATION);
+       }
+       else if(error){
+       }
+    }
 
     
     @wire(getAppointmentStatusPicklistValues)
@@ -55,10 +95,13 @@ export default class AppointmentEdit extends LightningElement {
     @wire(getSpecialization, { facilityId: "$selectedFacilityId" })
     wiredSpecialization({ error, data }) {
         if (data) {
+
             this.specializations = data.map(specialization => ({
                 label: specialization.Specialization__c,
                 value: specialization.Specialization__c
             }));
+
+            
         } else if (error) {
             console.error('Błąd pobierania specjalizacji', error);
         }
@@ -73,6 +116,21 @@ export default class AppointmentEdit extends LightningElement {
             }));
         } else if (error) {
             console.error('Błąd pobierania danych lekarzy', error);
+        }
+    }
+
+    @wire(getVisitTIme, { 
+        dateTimeString: "$dateString", 
+        medicalId: "$selectedFacilityId", 
+        doctorId: "$selectedDoctorId" 
+    })
+    wiredVisits({ error, data }) {
+        if (data) {
+            this.times = data.map(visit => ({
+                label: visit,
+                value: visit
+            }));
+        } else if (error) {
         }
     }
 
@@ -96,21 +154,27 @@ export default class AppointmentEdit extends LightningElement {
     }
 
     handleDateTimeChange(event) {
-        this.dateTimeString = event.target.value;
+        this.dateString = event.target.value;
     }
 
     handleAppointmentStatusChange(event) {
         this.selectedAppointmentStatus = event.detail.value;
     }
 
+    handleTimeChange(event) {
+        this.selectedTime = event.detail.value;
+    }
+
     handleAppointmentBooking() {
-        console.log('id: ' + this.selectedFacilityId)
+
         editAppointment({
-            appointmentId: this.recordId,
             facilityId: this.selectedFacilityId,
             doctorId: this.selectedDoctorId,
+            patientId: this.patientId,
             isOnline: this.selectedPicklistValue,
-            dateTimeString: this.dateTimeString,
+            dateTimeString: this.dateString,
+            visitTime: this.selectedTime,
+            appointmentId: this.recordId,
             appointmentStatus: this.selectedAppointmentStatus
         }).then(() => {
                 this.selectedFacilityId = null
@@ -124,10 +188,17 @@ export default class AppointmentEdit extends LightningElement {
                         variant: 'success'
                     })
                 );
+
+                const editRecordPageUrl = `/lightning/r/Medical_Appointment__c/${this.recordId}/view`;
+
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: editRecordPageUrl
+                    }
+                });
             })
             .catch(error => {
-                console.log(JSON.stringify(error))
-                console.log(JSON.stringify(error.body))
                 if (error.body.pageErrors === undefined) {
                     this.dispatchEvent(
                         new ShowToastEvent({
@@ -150,22 +221,6 @@ export default class AppointmentEdit extends LightningElement {
             })
     }
 
-    get facilitiesOptions() {
-        return this.facilities;
-    }
-
-    get specializationOptions() {
-        return this.specializations;
-    }
-
-    get doctorOptions() {
-        return this.doctors.sort((a, b) => a.label.localeCompare(b.label));
-    }
-
-    get appointmentStatusPicklistOptions() {
-        return this.appointmentStatusOptions;
-    }
-
     get isSpecializationDisabled() {
         return !this.selectedFacilityId;
     }
@@ -180,10 +235,9 @@ export default class AppointmentEdit extends LightningElement {
             this.selectedSpecializationId === null &&
             this.selectedDoctorId === null &&
             this.selectedAppointmentStatus === null &&
-            this.dateTimeString === null
-        ) ||
-        (
-            this.selectedFacilityId !== null && this.selectedDoctorId === null
+            this.dateString === null
         );
     }   
+
+    
 }
