@@ -10,8 +10,8 @@ trigger MedicalAppointmentTrigger on Medical_Appointment__c(
       handler.firstVisitToAnInternistOnSite(Trigger.new);
       
     } else {
-      handler.sendAppointmentEmail(Trigger.new, Trigger.oldMap);
       handler.InsuranceCheck(Trigger.new);
+      handler.sendAppointmentEmail(Trigger.new, Trigger.oldMap);
     }
   } else if (Trigger.isUpdate) {
     if (Trigger.isAfter) {
