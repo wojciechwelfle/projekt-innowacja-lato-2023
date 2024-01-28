@@ -1,5 +1,6 @@
 trigger InsuranceCheck on Medical_Appointment__c (after insert,after update) {
     
+    
     List<Medical_Appointment__c> newAppointments =[ 
         SELECT Patient__c
         FROM Medical_Appointment__c
