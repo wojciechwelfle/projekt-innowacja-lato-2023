@@ -5,17 +5,15 @@ trigger MedicalAppointmentTrigger on Medical_Appointment__c(
 ) {
   MedicalAppointmentTriggerHandler handler = new MedicalAppointmentTriggerHandler();
   if (Trigger.isInsert) {
-    
     if (Trigger.isBefore) {
       handler.firstVisitToAnInternistOnSite(Trigger.new);
-      
     } else {
-      handler.InsuranceCheck(Trigger.new);
+      handler.insurenceCheck(Trigger.new, Trigger.newMap );
       handler.sendAppointmentEmail(Trigger.new, Trigger.oldMap);
     }
   } else if (Trigger.isUpdate) {
     if (Trigger.isAfter) {
-      handler.InsuranceCheck(Trigger.new);
+      handler.insurenceCheck(Trigger.new,Trigger.newMap);
       handler.sendAppointmentEmail(Trigger.new, Trigger.oldMap);
     }
   }
