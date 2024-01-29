@@ -8,12 +8,5 @@ public class EinsteinApexClassesForBot {
         personIds.add(person.Id);
         return personIds;
     }
-
-    @InvocableMethod(label='Get Person Credentials')
-    public static List<Medical_Facility__c> getAllFacilities() {
-        return 
-            [
-                select Id, Name from Medical_Facility__c
-            ];
-    }
 }
+
