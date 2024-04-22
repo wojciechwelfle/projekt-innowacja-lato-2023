@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Open_hours_later_than_close_hours</fullName>
+    <active>true</active>
+    <errorConditionFormula>OR(
+    Monday_Open_Hours__c &gt;= Monday_Close_Hours__c,
+    Tuesday_Open_Hours__c &gt;= Tuesday_Close_Hours__c,
+    Wednesday_Open_Hours__c &gt;= Wednesday_Close_Hours__c,
+    Thursday_Open_Hours__c &gt;= Thursday_Close_Hours__c,
+    Friday_Open_Hours__c &gt;= Friday_Close_Hours__c,
+    Saturday_Open_Hours__c &gt;= Saturday_Close_Hours__c,
+    Sunday_Open_Hours__c &gt;= Sunday_Close_Hours__c
+)</errorConditionFormula>
+    <errorMessage>Open/Close hours should be after/before close/open hours.</errorMessage>
+</ValidationRule>
